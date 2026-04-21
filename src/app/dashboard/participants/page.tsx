@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Search, Edit2, Trash2, UserPlus, X, Filter, QrCode, Download, CheckCircle, Printer, MoreHorizontal, Mail, UserCheck, UserX, Users, ShieldCheck } from "lucide-react";
+import { Search, Edit2, Trash2, UserPlus, X, Filter, QrCode, Download, CheckCircle, Printer, MoreHorizontal, Mail, UserCheck, UserX, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Participant } from "@/types";
 import { QRCodeSVG } from "qrcode.react";
@@ -81,6 +81,12 @@ export default function ParticipantsPage() {
     const matchesStatus = filterStatus === "all" || p.status === filterStatus;
     return matchesSearch && matchesCategory && matchesStatus;
   });
+
+  const stats = {
+    total: filtered.length,
+    present: filtered.filter(p => p.status === 'presente').length,
+    absent: filtered.filter(p => p.status === 'ausente').length,
+  };
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -204,46 +210,46 @@ export default function ParticipantsPage() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-black tracking-tight text-slate-900">Participantes</h1>
-          <p className="text-slate-500 font-medium">Gestão estratégica da lista de convidados</p>
+          <h1 className="text-2xl font-bold text-slate-900">Participantes</h1>
+          <p className="text-sm text-slate-500">Gestão completa da lista de convidados.</p>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           {selectedIds.length > 0 && (
-            <div className="flex items-center gap-2 bg-white border-2 border-slate-100 shadow-xl p-2 rounded-2xl animate-in slide-in-from-right-8">
-              <Badge className="bg-primary text-white px-3 py-1 rounded-lg font-black text-[10px]">{selectedIds.length} SELECIONADOS</Badge>
-              <div className="h-6 w-px bg-slate-100 mx-1" />
+            <div className="flex items-center justify-between sm:justify-start gap-2 bg-white border border-slate-200 shadow-sm p-1 rounded-xl animate-in slide-in-from-right-4">
+              <span className="text-[10px] font-bold px-2 text-slate-500">{selectedIds.length} selecionados</span>
+              <div className="h-4 w-px bg-slate-200 mx-1 hidden sm:block" />
               <div className="flex items-center gap-1">
-                <Button size="sm" variant="ghost" className="h-10 px-3 rounded-xl font-bold text-emerald-600 hover:bg-emerald-50" onClick={handleBulkCheckin}>
-                  <CheckCircle className="w-4 h-4 mr-2" /> Check-in
+                <Button size="sm" variant="ghost" className="h-8 px-2 rounded-lg font-bold text-emerald-600 hover:bg-emerald-50" onClick={handleBulkCheckin}>
+                  <CheckCircle className="w-3.5 h-3.5" />
                 </Button>
-                <Button size="sm" variant="ghost" className="h-10 px-3 rounded-xl font-bold text-blue-600 hover:bg-blue-50" onClick={() => handlePrintBadges()}>
-                  <Printer className="w-4 h-4 mr-2" /> Crachás
+                <Button size="sm" variant="ghost" className="h-8 px-2 rounded-xl font-bold text-blue-600 hover:bg-blue-50" onClick={() => handlePrintBadges()}>
+                  <Printer className="w-3.5 h-3.5" />
                 </Button>
-                <Button size="sm" variant="ghost" className="h-10 px-3 rounded-xl font-bold text-destructive hover:bg-destructive/5" onClick={handleBulkDelete}>
-                  <Trash2 className="w-4 h-4 mr-2" /> Excluir
+                <Button size="sm" variant="ghost" className="h-8 px-2 rounded-lg font-bold text-destructive hover:bg-destructive/5" onClick={handleBulkDelete}>
+                  <Trash2 className="w-3.5 h-3.5" />
                 </Button>
               </div>
-              <Button size="sm" variant="ghost" className="h-10 w-10 p-0 rounded-xl" onClick={() => setSelectedIds([])}>
-                <X className="w-4 h-4" />
+              <Button size="sm" variant="ghost" className="h-8 w-8 p-0 rounded-lg" onClick={() => setSelectedIds([])}>
+                <X className="w-3.5 h-3.5" />
               </Button>
             </div>
           )}
-          <Button onClick={handleOpenAdd} className="h-14 px-8 rounded-2xl font-black text-lg gap-3 shadow-xl shadow-primary/20 hover:scale-[1.02] transition-transform">
-            <UserPlus className="w-6 h-6" />
+          <Button onClick={handleOpenAdd} className="h-10 px-4 rounded-lg font-bold gap-2 shadow-sm w-full sm:w-auto">
+            <UserPlus className="w-4 h-4" />
             Novo Participante
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
         <div className="md:col-span-2 relative group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 group-focus-within:text-primary transition-colors" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 group-focus-within:text-slate-900 transition-colors" />
           <Input 
-            className="h-14 pl-12 pr-12 rounded-2xl border-none bg-white shadow-lg shadow-slate-200/50 focus-visible:ring-4 focus-visible:ring-primary/10 text-lg font-medium"
+            className="h-10 pl-10 pr-10 rounded-lg border-slate-200 bg-white shadow-sm focus-visible:ring-slate-900/10"
             placeholder="Buscar por nome ou CPF..."
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -251,61 +257,59 @@ export default function ParticipantsPage() {
         </div>
 
         <Select value={filterCategory} onValueChange={setFilterCategory}>
-          <SelectTrigger className="h-14 rounded-2xl border-none bg-white shadow-lg shadow-slate-200/50 font-bold">
-            <div className="flex items-center gap-3">
-              <Filter className="w-4 h-4 text-primary" />
+          <SelectTrigger className="h-10 rounded-lg border-slate-200 bg-white shadow-sm">
+            <div className="flex items-center gap-2">
+              <Filter className="w-3.5 h-3.5 opacity-50" />
               <SelectValue placeholder="Categoria" />
             </div>
           </SelectTrigger>
-          <SelectContent className="rounded-2xl border-none shadow-2xl">
-            <SelectItem value="all" className="font-bold">Todas Categorias</SelectItem>
+          <SelectContent className="rounded-lg">
+            <SelectItem value="all">Todas Categorias</SelectItem>
             {categories.map(c => (
-              <SelectItem key={c.id} value={c.id} className="font-bold">{c.name}</SelectItem>
+              <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
 
         <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="h-14 rounded-2xl border-none bg-white shadow-lg shadow-slate-200/50 font-bold">
+          <SelectTrigger className="h-10 rounded-lg border-slate-200 bg-white shadow-sm">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
-          <SelectContent className="rounded-2xl border-none shadow-2xl">
-            <SelectItem value="all" className="font-bold">Todos Status</SelectItem>
-            <SelectItem value="presente" className="font-bold text-emerald-600">Presentes</SelectItem>
-            <SelectItem value="ausente" className="font-bold text-slate-400">Ausentes</SelectItem>
+          <SelectContent className="rounded-lg">
+            <SelectItem value="all">Todos Status</SelectItem>
+            <SelectItem value="presente">Presentes</SelectItem>
+            <SelectItem value="ausente">Ausentes</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      <Card className="border-none shadow-2xl shadow-slate-200/50 rounded-[2.5rem] overflow-hidden bg-white">
+      <Card className="border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto custom-scrollbar">
-          <Table>
+          <Table className="min-w-[800px] md:min-w-full">
             <TableHeader className="bg-slate-50/50">
               <TableRow className="hover:bg-transparent border-slate-100">
-                <TableHead className="w-16 text-center py-6">
+                <TableHead className="w-12 text-center">
                   <Checkbox 
                     checked={filtered.length > 0 && selectedIds.length === filtered.length}
                     onCheckedChange={handleSelectAll}
-                    className="rounded-lg w-5 h-5"
+                    className="rounded"
                   />
                 </TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 py-6">Participante</TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 py-6">Documento</TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 py-6">Categoria</TableHead>
-                <TableHead className="text-center font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 py-6">Mesa</TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 py-6">Status</TableHead>
-                <TableHead className="text-right font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 py-6 pr-8">Ações</TableHead>
+                <TableHead className="font-bold text-[10px] uppercase tracking-widest text-slate-400 py-3">Participante</TableHead>
+                <TableHead className="font-bold text-[10px] uppercase tracking-widest text-slate-400 py-3">Documento</TableHead>
+                <TableHead className="font-bold text-[10px] uppercase tracking-widest text-slate-400 py-3">Categoria</TableHead>
+                <TableHead className="text-center font-bold text-[10px] uppercase tracking-widest text-slate-400 py-3">Mesa</TableHead>
+                <TableHead className="font-bold text-[10px] uppercase tracking-widest text-slate-400 py-3">Status</TableHead>
+                <TableHead className="text-right font-bold text-[10px] uppercase tracking-widest text-slate-400 py-3">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-32 text-slate-400">
-                    <div className="flex flex-col items-center gap-4">
-                      <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center">
-                        <Users className="w-10 h-10 opacity-20" />
-                      </div>
-                      <p className="text-lg font-bold">Nenhum participante encontrado</p>
+                  <TableCell colSpan={7} className="text-center py-20 text-slate-400">
+                    <div className="flex flex-col items-center gap-3">
+                      <Search className="w-8 h-8 opacity-10" />
+                      <p className="text-xs font-medium">Nenhum participante encontrado</p>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -315,85 +319,86 @@ export default function ParticipantsPage() {
                   const isSelected = selectedIds.includes(p.id);
                   return (
                     <TableRow key={p.id} className={cn(
-                      "group transition-all border-slate-50",
-                      isSelected ? "bg-primary/5" : "hover:bg-slate-50/50"
+                      "group transition-colors border-slate-50",
+                      isSelected ? "bg-slate-50" : "hover:bg-slate-50/30"
                     )}>
-                      <TableCell className="text-center py-6">
+                      <TableCell className="text-center">
                         <Checkbox 
                           checked={isSelected}
                           onCheckedChange={(checked) => handleSelectOne(p.id, !!checked)}
-                          className="rounded-lg w-5 h-5"
+                          className="rounded"
                         />
                       </TableCell>
-                      <TableCell className="py-6">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center font-black text-slate-400 text-lg shrink-0 group-hover:bg-primary group-hover:text-white transition-all">
+                      <TableCell className="py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center font-bold text-slate-400 text-[10px] shrink-0">
                             {p.name.charAt(0).toUpperCase()}
                           </div>
                           <div className="min-w-0">
-                            <div className="font-black text-slate-900 text-lg truncate">{p.name}</div>
-                            <div className="text-xs text-slate-400 font-bold flex items-center gap-2 truncate">
-                              <Mail className="w-3 h-3 shrink-0" /> {p.email || 'Sem e-mail'}
+                            <div className="font-bold text-slate-900 text-sm truncate max-w-[150px] md:max-w-none">{p.name}</div>
+                            <div className="text-[10px] text-slate-400 flex items-center gap-1 truncate">
+                              <Mail className="w-2.5 h-2.5 shrink-0" /> {p.email || 'Sem e-mail'}
                             </div>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="font-black text-slate-600 text-sm tabular-nums">{p.cpf}</TableCell>
+                      <TableCell className="font-medium text-slate-600 text-xs whitespace-nowrap">{p.cpf}</TableCell>
                       <TableCell>
                         {category && (
                           <Badge 
                             variant="outline" 
-                            className="rounded-xl px-4 py-1 font-black text-[10px] uppercase tracking-widest"
-                            style={{ color: category.color, borderColor: `${category.color}30`, backgroundColor: `${category.color}10` }}
+                            className="rounded-md px-2 py-0 font-bold text-[9px] uppercase tracking-wider whitespace-nowrap"
+                            style={{ color: category.color, borderColor: `${category.color}20`, backgroundColor: `${category.color}05` }}
                           >
                             {category.name}
                           </Badge>
                         )}
                       </TableCell>
                       <TableCell className="text-center">
-                        <span className="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-slate-100 text-slate-900 font-black text-lg shadow-sm">
+                        <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-slate-100 text-slate-900 font-bold text-[10px]">
                           {p.table}
                         </span>
                       </TableCell>
                       <TableCell>
                         <Badge 
+                          variant={p.status === 'presente' ? 'default' : 'secondary'} 
                           className={cn(
-                            "rounded-xl px-4 py-1 font-black text-[10px] uppercase tracking-widest border-none",
-                            p.status === 'presente' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-200' : 'bg-slate-100 text-slate-400'
+                            "rounded-md px-2 py-0 font-bold text-[9px] uppercase tracking-wider whitespace-nowrap",
+                            p.status === 'presente' ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-slate-100 text-slate-400'
                           )}
                         >
                           {p.status === 'presente' ? 'Presente' : 'Ausente'}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right pr-8">
+                      <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-12 w-12 rounded-2xl hover:bg-slate-100">
-                              <MoreHorizontal className="w-6 h-6" />
+                            <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg">
+                              <MoreHorizontal className="w-3.5 h-3.5" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-56 rounded-[1.5rem] p-2 border-none shadow-2xl">
-                            <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-3 py-2">Ações Rápidas</DropdownMenuLabel>
-                            <DropdownMenuItem className="rounded-xl gap-3 cursor-pointer py-3 font-bold" onClick={() => {
+                          <DropdownMenuContent align="end" className="w-44 rounded-xl p-1.5">
+                            <DropdownMenuLabel className="text-[9px] font-bold uppercase tracking-widest text-slate-400 px-2 py-1">Opções</DropdownMenuLabel>
+                            <DropdownMenuItem className="rounded-lg gap-2 cursor-pointer text-xs" onClick={() => {
                               setSelectedParticipant(p);
                               setIsQrDialogOpen(true);
                             }}>
-                              <QrCode className="w-5 h-5 text-primary" /> QR Code Digital
+                              <QrCode className="w-3.5 h-3.5" /> QR Code
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="rounded-xl gap-3 cursor-pointer py-3 font-bold" onClick={() => handlePrintBadges([p.id])}>
-                              <Printer className="w-5 h-5 text-primary" /> Imprimir Crachá
+                            <DropdownMenuItem className="rounded-lg gap-2 cursor-pointer text-xs" onClick={() => handlePrintBadges([p.id])}>
+                              <Printer className="w-3.5 h-3.5" /> Imprimir Crachá
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="rounded-xl gap-3 cursor-pointer py-3 font-bold" onClick={() => handleOpenEdit(p)}>
-                              <Edit2 className="w-5 h-5 text-primary" /> Editar Cadastro
+                            <DropdownMenuItem className="rounded-lg gap-2 cursor-pointer text-xs" onClick={() => handleOpenEdit(p)}>
+                              <Edit2 className="w-3.5 h-3.5" /> Editar Dados
                             </DropdownMenuItem>
-                            <DropdownMenuSeparator className="my-2 bg-slate-50" />
+                            <DropdownMenuSeparator className="my-1" />
                             <DropdownMenuItem 
-                              className="rounded-xl gap-3 cursor-pointer py-3 font-bold text-destructive focus:text-destructive focus:bg-destructive/5" 
+                              className="rounded-lg gap-2 cursor-pointer text-xs text-destructive focus:text-destructive focus:bg-destructive/5" 
                               onClick={() => {
                                 if(confirm(`Excluir ${p.name}?`)) deleteParticipant(p.id);
                               }}
                             >
-                              <Trash2 className="w-5 h-5" /> Remover Registro
+                              <Trash2 className="w-3.5 h-3.5" /> Excluir
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -409,35 +414,30 @@ export default function ParticipantsPage() {
 
       {/* QR Code Dialog */}
       <Dialog open={isQrDialogOpen} onOpenChange={setIsQrDialogOpen}>
-        <DialogContent className="max-w-sm rounded-[2.5rem] p-8 border-none shadow-2xl">
+        <DialogContent className="max-w-[90vw] sm:max-w-xs rounded-2xl p-6">
           <DialogHeader>
-            <DialogTitle className="text-center text-2xl font-black">Acesso Digital</DialogTitle>
+            <DialogTitle className="text-center text-lg font-bold">Acesso Digital</DialogTitle>
             <VisuallyHidden>
-              <DialogDescription>QR Code de acesso individual.</DialogDescription>
+              <DialogDescription>QR Code de acesso.</DialogDescription>
             </VisuallyHidden>
           </DialogHeader>
           {selectedParticipant && (
-            <div className="flex flex-col items-center space-y-8 py-4">
-              <div className="bg-white p-6 rounded-[2rem] shadow-2xl border-2 border-slate-50 relative group">
-                <div className="absolute -inset-4 bg-primary/5 rounded-[3rem] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="flex flex-col items-center space-y-6 py-2">
+              <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
                 <QRCodeSVG 
                   value={selectedParticipant.id} 
-                  size={200}
+                  size={140}
                   level="H"
                   includeMargin={false}
-                  className="relative z-10"
                 />
               </div>
-              <div className="text-center space-y-1">
-                <p className="font-black text-2xl text-slate-900 leading-tight">{selectedParticipant.name}</p>
-                <div className="flex items-center justify-center gap-2">
-                  <Badge variant="secondary" className="bg-slate-100 text-slate-500 font-black text-[10px] px-2 py-0.5 rounded-lg">MESA {selectedParticipant.table}</Badge>
-                  <Badge className="bg-emerald-500 text-white font-black text-[10px] px-2 py-0.5 rounded-lg">ATIVO</Badge>
-                </div>
+              <div className="text-center">
+                <p className="font-bold text-lg text-slate-900 leading-tight">{selectedParticipant.name}</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Mesa {selectedParticipant.table}</p>
               </div>
-              <Button className="w-full h-16 rounded-2xl font-black text-lg gap-3 shadow-xl shadow-primary/20" onClick={() => window.print()}>
-                <Download className="w-6 h-6" />
-                Baixar QR Code
+              <Button className="w-full h-11 rounded-lg font-bold gap-2 shadow-sm" onClick={() => window.print()}>
+                <Download className="w-4 h-4" />
+                Salvar QR Code
               </Button>
             </div>
           )}
@@ -446,81 +446,81 @@ export default function ParticipantsPage() {
 
       {/* Add/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-xl rounded-[2.5rem] p-10 border-none shadow-2xl">
+        <DialogContent className="max-w-[95vw] sm:max-w-lg rounded-2xl p-6">
           <DialogHeader>
-            <DialogTitle className="text-3xl font-black tracking-tight">
-              {editingParticipant ? 'Editar Registro' : 'Novo Participante'}
+            <DialogTitle className="text-xl font-bold">
+              {editingParticipant ? 'Editar Participante' : 'Novo Participante'}
             </DialogTitle>
             <VisuallyHidden>
-              <DialogDescription>Formulário de cadastro de participante.</DialogDescription>
+              <DialogDescription>Formulário de cadastro.</DialogDescription>
             </VisuallyHidden>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-6 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Nome Completo</Label>
+          <form onSubmit={handleSubmit} className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="name" className="text-xs font-bold text-slate-700 ml-0.5">Nome Completo</Label>
               <Input 
                 id="name" 
                 required 
-                className="h-14 rounded-2xl border-none bg-slate-50 focus-visible:ring-4 focus-visible:ring-primary/10 text-lg font-bold"
+                className="h-10 rounded-lg border-slate-200"
                 value={formData.name}
                 onChange={e => setFormData({...formData, name: e.target.value})}
               />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">E-mail</Label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-xs font-bold text-slate-700 ml-0.5">E-mail</Label>
                 <Input 
                   id="email" 
                   type="email" 
-                  className="h-14 rounded-2xl border-none bg-slate-50 focus-visible:ring-4 focus-visible:ring-primary/10 text-lg font-bold"
+                  className="h-10 rounded-lg border-slate-200"
                   value={formData.email}
                   onChange={e => setFormData({...formData, email: e.target.value})}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="cpf" className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">CPF</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="cpf" className="text-xs font-bold text-slate-700 ml-0.5">CPF</Label>
                 <Input 
                   id="cpf" 
                   required 
-                  className="h-14 rounded-2xl border-none bg-slate-50 focus-visible:ring-4 focus-visible:ring-primary/10 text-lg font-bold"
+                  className="h-10 rounded-lg border-slate-200"
                   value={formData.cpf}
                   onChange={e => setFormData({...formData, cpf: e.target.value})}
                 />
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="category" className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Categoria</Label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="category" className="text-xs font-bold text-slate-700 ml-0.5">Categoria</Label>
                 <Select 
                   value={formData.categoryId} 
                   onValueChange={v => setFormData({...formData, categoryId: v})}
                 >
-                  <SelectTrigger className="h-14 rounded-2xl border-none bg-slate-50 focus-visible:ring-4 focus-visible:ring-primary/10 text-lg font-bold">
+                  <SelectTrigger className="h-10 rounded-lg border-slate-200">
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
-                  <SelectContent className="rounded-2xl border-none shadow-2xl">
+                  <SelectContent className="rounded-lg">
                     {categories.map(c => (
-                      <SelectItem key={c.id} value={c.id} className="font-bold">{c.name}</SelectItem>
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="table" className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Mesa</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="table" className="text-xs font-bold text-slate-700 ml-0.5">Mesa</Label>
                 <Input 
                   id="table" 
                   type="number" 
                   min="1" 
                   required 
-                  className="h-14 rounded-2xl border-none bg-slate-50 focus-visible:ring-4 focus-visible:ring-primary/10 text-lg font-bold"
+                  className="h-10 rounded-lg border-slate-200"
                   value={formData.table}
                   onChange={e => setFormData({...formData, table: e.target.value})}
                 />
               </div>
             </div>
-            <DialogFooter className="pt-8">
-              <Button type="submit" className="w-full h-20 rounded-[2rem] font-black text-xl shadow-2xl shadow-primary/20 hover:scale-[1.02] transition-transform">
-                {editingParticipant ? 'Salvar Alterações' : 'Finalizar Cadastro'}
+            <DialogFooter className="pt-4">
+              <Button type="submit" className="w-full h-11 rounded-lg font-bold text-sm shadow-sm">
+                {editingParticipant ? 'Salvar Alterações' : 'Cadastrar Participante'}
               </Button>
             </DialogFooter>
           </form>
