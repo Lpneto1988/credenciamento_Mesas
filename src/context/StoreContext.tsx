@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User, Participant, Category } from '@/types';
+import { User, Participant, Category, UserRole } from '@/types';
 import { toast } from 'sonner';
 
 interface StoreContextType {
@@ -15,6 +15,7 @@ interface StoreContextType {
   deleteParticipant: (id: string) => void;
   performCheckin: (participantId: string) => void;
   addCategory: (c: Omit<Category, 'id'>) => string;
+  deleteCategory: (id: string) => void;
   importParticipants: (data: any[]) => { success: number; errors: string[] };
 }
 
@@ -29,7 +30,6 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     { id: '3', name: 'Cliente', color: '#10b981' },
   ]);
 
-  // Load from localStorage on mount
   useEffect(() => {
     const savedParticipants = localStorage.getItem('event_participants');
     const savedCategories = localStorage.getItem('event_categories');
@@ -40,7 +40,6 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     if (savedUser) setCurrentUser(JSON.parse(savedUser));
   }, []);
 
-  // Save to localStorage on changes
   useEffect(() => {
     localStorage.setItem('event_participants', JSON.stringify(participants));
     localStorage.setItem('event_categories', JSON.stringify(categories));
@@ -73,6 +72,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
 
   const updateParticipant = (id: string, p: Partial<Participant>) => {
     setParticipants(participants.map(part => part.id === id ? { ...part, ...p } : part));
+    toast.success("Dados atualizados");
   };
 
   const deleteParticipant = (id: string) => {
@@ -83,11 +83,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   const performCheckin = (participantId: string) => {
     const participant = participants.find(p => p.id === participantId);
     if (!participant) return;
-    if (participant.status === 'presente') {
-      toast.warning("Participante já realizou check-in");
-      return;
-    }
-
+    
     setParticipants(participants.map(p => 
       p.id === participantId 
         ? { ...p, status: 'presente', checkinTime: new Date().toISOString(), operatorId: currentUser?.id } 
@@ -101,44 +97,55 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
 
     const newId = Math.random().toString(36).substr(2, 9);
     setCategories([...categories, { ...c, id: newId }]);
+    toast.success("Categoria criada");
     return newId;
+  };
+
+  const deleteCategory = (id: string) => {
+    if (participants.some(p => p.categoryId === id)) {
+      toast.error("Não é possível excluir: existem participantes nesta categoria");
+      return;
+    }
+    setCategories(categories.filter(c => c.id !== id));
+    toast.success("Categoria removida");
   };
 
   const importParticipants = (data: any[]) => {
     let success = 0;
     const errors: string[] = [];
     const newParticipants = [...participants];
+    const currentCategories = [...categories];
 
     data.forEach((row, index) => {
       const { nome, email, cpf, categoria, mesa } = row;
       
       if (!nome || !cpf || !mesa) {
-        errors.push(`Linha ${index + 1}: Campos obrigatórios ausentes`);
+        errors.push(`Linha ${index + 1}: Campos obrigatórios ausentes (nome, cpf, mesa)`);
         return;
       }
 
       if (newParticipants.some(p => p.cpf === cpf)) {
-        errors.push(`Linha ${index + 1}: CPF ${cpf} duplicado`);
+        errors.push(`Linha ${index + 1}: CPF ${cpf} já existe no sistema`);
         return;
       }
 
       const mesaNum = parseInt(mesa);
       if (isNaN(mesaNum) || mesaNum < 1 || mesaNum > 20) {
-        errors.push(`Linha ${index + 1}: Mesa ${mesa} inválida (deve ser 1-20)`);
+        errors.push(`Linha ${index + 1}: Mesa ${mesa} inválida (deve ser entre 1 e 20)`);
         return;
       }
 
-      let catId = categories.find(c => c.name.toLowerCase() === categoria?.toLowerCase())?.id;
+      let catId = currentCategories.find(c => c.name.toLowerCase() === categoria?.trim().toLowerCase())?.id;
       if (!catId && categoria) {
         catId = Math.random().toString(36).substr(2, 9);
-        categories.push({ id: catId, name: categoria, color: '#94a3b8' });
+        currentCategories.push({ id: catId, name: categoria.trim(), color: '#94a3b8' });
       }
 
       newParticipants.push({
         id: Math.random().toString(36).substr(2, 9),
-        name: nome,
-        email: email || '',
-        cpf: cpf,
+        name: nome.trim(),
+        email: email?.trim() || '',
+        cpf: cpf.trim(),
         categoryId: catId || '3',
         table: mesaNum,
         status: 'ausente'
@@ -147,7 +154,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     setParticipants(newParticipants);
-    setCategories([...categories]);
+    setCategories(currentCategories);
     return { success, errors };
   };
 
@@ -155,7 +162,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     <StoreContext.Provider value={{ 
       currentUser, participants, categories, login, logout, 
       addParticipant, updateParticipant, deleteParticipant, 
-      performCheckin, addCategory, importParticipants 
+      performCheckin, addCategory, deleteCategory, importParticipants 
     }}>
       {children}
     </StoreContext.Provider>

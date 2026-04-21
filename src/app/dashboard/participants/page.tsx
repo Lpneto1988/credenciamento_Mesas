@@ -28,13 +28,15 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Plus, Search, Edit2, Trash2, UserPlus } from "lucide-react";
+import { Search, Edit2, Trash2, UserPlus, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Participant } from "@/types";
 
 export default function ParticipantsPage() {
-  const { participants, categories, addParticipant, deleteParticipant } = useStore();
+  const { participants, categories, addParticipant, updateParticipant, deleteParticipant } = useStore();
   const [search, setSearch] = useState("");
-  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingParticipant, setEditingParticipant] = useState<Participant | null>(null);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -49,17 +51,40 @@ export default function ParticipantsPage() {
     p.cpf.includes(search)
   );
 
+  const handleOpenAdd = () => {
+    setEditingParticipant(null);
+    setFormData({ name: '', email: '', cpf: '', categoryId: categories[0]?.id || '', table: '1' });
+    setIsDialogOpen(true);
+  };
+
+  const handleOpenEdit = (p: Participant) => {
+    setEditingParticipant(p);
+    setFormData({
+      name: p.name,
+      email: p.email,
+      cpf: p.cpf,
+      categoryId: p.categoryId,
+      table: p.table.toString()
+    });
+    setIsDialogOpen(true);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    addParticipant({
+    const data = {
       name: formData.name,
       email: formData.email,
       cpf: formData.cpf,
-      categoryId: formData.categoryId || categories[0]?.id,
+      categoryId: formData.categoryId,
       table: parseInt(formData.table)
-    });
-    setIsAddOpen(false);
-    setFormData({ name: '', email: '', cpf: '', categoryId: '', table: '1' });
+    };
+
+    if (editingParticipant) {
+      updateParticipant(editingParticipant.id, data);
+    } else {
+      addParticipant(data);
+    }
+    setIsDialogOpen(false);
   };
 
   return (
@@ -70,93 +95,28 @@ export default function ParticipantsPage() {
           <p className="text-muted-foreground">Gerencie a lista de convidados do evento</p>
         </div>
 
-        <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-          <DialogTrigger asChild>
-            <Button className="gap-2">
-              <UserPlus className="w-4 h-4" />
-              Novo Participante
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Adicionar Participante</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nome Completo</Label>
-                <Input 
-                  id="name" 
-                  required 
-                  value={formData.name}
-                  onChange={e => setFormData({...formData, name: e.target.value})}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">E-mail</Label>
-                  <Input 
-                    id="email" 
-                    type="email" 
-                    value={formData.email}
-                    onChange={e => setFormData({...formData, email: e.target.value})}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="cpf">CPF</Label>
-                  <Input 
-                    id="cpf" 
-                    required 
-                    value={formData.cpf}
-                    onChange={e => setFormData({...formData, cpf: e.target.value})}
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="category">Categoria</Label>
-                  <Select 
-                    value={formData.categoryId} 
-                    onValueChange={v => setFormData({...formData, categoryId: v})}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map(c => (
-                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="table">Mesa (1-20)</Label>
-                  <Input 
-                    id="table" 
-                    type="number" 
-                    min="1" 
-                    max="20" 
-                    required 
-                    value={formData.table}
-                    onChange={e => setFormData({...formData, table: e.target.value})}
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button type="submit" className="w-full">Salvar Participante</Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <Button onClick={handleOpenAdd} className="gap-2">
+          <UserPlus className="w-4 h-4" />
+          Novo Participante
+        </Button>
       </div>
 
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
         <Input 
-          className="pl-10"
+          className="pl-10 pr-10"
           placeholder="Buscar por nome ou CPF..."
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
+        {search && (
+          <button 
+            onClick={() => setSearch("")}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
@@ -174,8 +134,11 @@ export default function ParticipantsPage() {
           <TableBody>
             {filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                  Nenhum participante encontrado.
+                <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+                  <div className="flex flex-col items-center gap-2">
+                    <Search className="w-8 h-8 opacity-20" />
+                    <p>Nenhum participante encontrado.</p>
+                  </div>
                 </TableCell>
               </TableRow>
             ) : (
@@ -203,14 +166,21 @@ export default function ParticipantsPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8"
+                          onClick={() => handleOpenEdit(p)}
+                        >
                           <Edit2 className="w-4 h-4" />
                         </Button>
                         <Button 
                           variant="ghost" 
                           size="icon" 
-                          className="h-8 w-8 text-destructive"
-                          onClick={() => deleteParticipant(p.id)}
+                          className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                          onClick={() => {
+                            if(confirm(`Excluir ${p.name}?`)) deleteParticipant(p.id);
+                          }}
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -223,6 +193,80 @@ export default function ParticipantsPage() {
           </TableBody>
         </Table>
       </div>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingParticipant ? 'Editar Participante' : 'Adicionar Participante'}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Nome Completo</Label>
+              <Input 
+                id="name" 
+                required 
+                value={formData.name}
+                onChange={e => setFormData({...formData, name: e.target.value})}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">E-mail</Label>
+                <Input 
+                  id="email" 
+                  type="email" 
+                  value={formData.email}
+                  onChange={e => setFormData({...formData, email: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="cpf">CPF</Label>
+                <Input 
+                  id="cpf" 
+                  required 
+                  value={formData.cpf}
+                  onChange={e => setFormData({...formData, cpf: e.target.value})}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="category">Categoria</Label>
+                <Select 
+                  value={formData.categoryId} 
+                  onValueChange={v => setFormData({...formData, categoryId: v})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map(c => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="table">Mesa (1-20)</Label>
+                <Input 
+                  id="table" 
+                  type="number" 
+                  min="1" 
+                  max="20" 
+                  required 
+                  value={formData.table}
+                  onChange={e => setFormData({...formData, table: e.target.value})}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="submit" className="w-full">
+                {editingParticipant ? 'Salvar Alterações' : 'Cadastrar Participante'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

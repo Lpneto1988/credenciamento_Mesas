@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash2, Palette } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 
 export default function CategoriesPage() {
-  const { categories, addCategory } = useStore();
+  const { categories, addCategory, deleteCategory } = useStore();
   const [name, setName] = useState("");
   const [color, setColor] = useState("#3b82f6");
 
@@ -49,7 +49,7 @@ export default function CategoriesPage() {
                   <Input 
                     id="cat-color" 
                     type="color" 
-                    className="w-12 h-10 p-1"
+                    className="w-12 h-10 p-1 cursor-pointer"
                     value={color}
                     onChange={e => setColor(e.target.value)}
                   />
@@ -69,19 +69,32 @@ export default function CategoriesPage() {
         </Card>
 
         <div className="md:col-span-2 grid sm:grid-cols-2 gap-4">
-          {categories.map(cat => (
-            <Card key={cat.id} className="overflow-hidden border-l-4" style={{ borderLeftColor: cat.color }}>
-              <CardContent className="p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-4 h-4 rounded-full" style={{ backgroundColor: cat.color }} />
-                  <span className="font-bold">{cat.name}</span>
-                </div>
-                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+          {categories.length === 0 ? (
+            <div className="col-span-full py-12 text-center border-2 border-dashed rounded-xl text-muted-foreground">
+              Nenhuma categoria cadastrada.
+            </div>
+          ) : (
+            categories.map(cat => (
+              <Card key={cat.id} className="overflow-hidden border-l-4" style={{ borderLeftColor: cat.color }}>
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-4 h-4 rounded-full" style={{ backgroundColor: cat.color }} />
+                    <span className="font-bold">{cat.name}</span>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                    onClick={() => {
+                      if(confirm(`Excluir categoria ${cat.name}?`)) deleteCategory(cat.id);
+                    }}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </CardContent>
+              </Card>
+            ))
+          )}
         </div>
       </div>
     </div>
