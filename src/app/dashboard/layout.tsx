@@ -13,7 +13,8 @@ import {
   LogOut, 
   Menu,
   CheckCircle2,
-  Settings
+  Settings,
+  Grid3X3
 } from "lucide-react";
 import { 
   Sheet, 
@@ -22,6 +23,7 @@ import {
 } from "@/components/ui/sheet";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { MadeWithDyad } from "@/components/made-with-dyad";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { currentUser, logout } = useStore();
@@ -36,10 +38,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (!currentUser) return null;
 
-  const isAdmin = currentUser.role === 'admin';
-
   const navItems = [
     { name: 'Check-in', href: '/dashboard', icon: CheckCircle2, roles: ['admin', 'operator'] },
+    { name: 'Mapa de Mesas', href: '/dashboard/tables', icon: Grid3X3, roles: ['admin', 'operator'] },
     { name: 'Participantes', href: '/dashboard/participants', icon: Users, roles: ['admin'] },
     { name: 'Categorias', href: '/dashboard/categories', icon: Tags, roles: ['admin'] },
     { name: 'Importar', href: '/dashboard/import', icon: Upload, roles: ['admin'] },
@@ -77,7 +78,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </Link>
         ))}
       </nav>
-      <div className="p-4 border-t">
+      <div className="p-4 border-t space-y-2">
         <Button 
           variant="ghost" 
           className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
@@ -89,6 +90,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <LogOut className="w-4 h-4 mr-2" />
           Sair
         </Button>
+        <MadeWithDyad />
       </div>
     </div>
   );

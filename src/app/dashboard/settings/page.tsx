@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Settings, Save, Calendar, MapPin, Hash } from "lucide-react";
+import { Settings, Save, Calendar, MapPin, Hash, Users } from "lucide-react";
 
 export default function SettingsPage() {
   const { eventSettings, updateSettings } = useStore();
@@ -72,17 +72,32 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="event-location" className="flex items-center gap-2">
-                <MapPin className="w-4 h-4" />
-                Localização
-              </Label>
-              <Input 
-                id="event-location" 
-                value={formData.location}
-                onChange={e => setFormData({...formData, location: e.target.value})}
-                placeholder="Ex: Hotel Transamérica, São Paulo"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="event-capacity" className="flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  Capacidade por Mesa
+                </Label>
+                <Input 
+                  id="event-capacity" 
+                  type="number"
+                  min="1"
+                  value={formData.capacityPerTable}
+                  onChange={e => setFormData({...formData, capacityPerTable: parseInt(e.target.value) || 1})}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="event-location" className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4" />
+                  Localização
+                </Label>
+                <Input 
+                  id="event-location" 
+                  value={formData.location}
+                  onChange={e => setFormData({...formData, location: e.target.value})}
+                  placeholder="Ex: Hotel Transamérica, São Paulo"
+                />
+              </div>
             </div>
 
             <Button type="submit" className="w-full gap-2">

@@ -35,7 +35,8 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     name: 'Meu Grande Evento',
     date: new Date().toISOString().split('T')[0],
     location: 'Centro de Convenções',
-    totalTables: 20
+    totalTables: 20,
+    capacityPerTable: 10
   });
 
   useEffect(() => {

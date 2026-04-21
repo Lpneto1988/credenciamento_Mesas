@@ -30,4 +30,5 @@ export interface EventSettings {
   date: string;
   location: string;
   totalTables: number;
+  capacityPerTable: number;
 }
