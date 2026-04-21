@@ -56,13 +56,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const NavContent = () => (
     <div className="flex flex-col h-full bg-white">
       <div className="p-6 border-b border-slate-100">
-        <div className="flex flex-col items-center text-center gap-4 mb-8">
-          <div className="relative w-28 h-28 shrink-0">
+        <div className="flex flex-col items-center text-center mb-8">
+          <div className="relative w-32 h-32 shrink-0">
             <Image src="/logo.png" alt="Orion" fill className="object-contain" priority />
-          </div>
-          <div>
-            <h1 className="text-2xl font-black tracking-tighter leading-none text-slate-900">ORION</h1>
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.3em] mt-1">Event Technology</p>
           </div>
         </div>
         <div className="flex items-center gap-3 p-2 rounded-xl bg-slate-50 border border-slate-100">
@@ -124,14 +120,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Mobile Header */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="md:hidden flex items-center justify-between px-4 py-4 border-b border-slate-200 bg-white z-20">
-          <div className="flex items-center gap-4">
-            <div className="relative w-20 h-20">
+        <header className="md:hidden flex items-center justify-between px-4 py-2 border-b border-slate-200 bg-white z-20">
+          <div className="flex items-center">
+            <div className="relative w-24 h-24">
               <Image src="/logo.png" alt="Orion" fill className="object-contain" priority />
-            </div>
-            <div>
-              <h1 className="font-black tracking-tighter text-lg leading-none">ORION</h1>
-              <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Event Tech</p>
             </div>
           </div>
           <Sheet>
