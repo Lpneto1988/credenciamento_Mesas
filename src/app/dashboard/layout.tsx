@@ -25,6 +25,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { currentUser, logout } = useStore();
