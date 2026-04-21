@@ -213,30 +213,32 @@ export default function ParticipantsPage() {
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-slate-900">Participantes</h1>
-          <p className="text-slate-500">Gerencie a lista de convidados e emita credenciais.</p>
+          <h1 className="text-2xl md:text-3xl font-black tracking-tight text-slate-900">Participantes</h1>
+          <p className="text-sm md:text-base text-slate-500">Gerencie a lista de convidados e emita credenciais.</p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           {selectedIds.length > 0 && (
-            <div className="flex items-center gap-2 bg-white border shadow-sm p-1.5 rounded-2xl animate-in slide-in-from-right-4">
-              <span className="text-xs font-black px-3 text-primary">{selectedIds.length} selecionados</span>
-              <div className="h-4 w-px bg-slate-200 mx-1" />
-              <Button size="sm" variant="ghost" className="h-9 rounded-xl gap-2 font-bold text-emerald-600 hover:bg-emerald-50" onClick={handleBulkCheckin}>
-                <CheckCircle className="w-4 h-4" /> Check-in
-              </Button>
-              <Button size="sm" variant="ghost" className="h-9 rounded-xl gap-2 font-bold text-blue-600 hover:bg-blue-50" onClick={() => handlePrintBadges()}>
-                <Printer className="w-4 h-4" /> Crachás
-              </Button>
-              <Button size="sm" variant="ghost" className="h-9 rounded-xl gap-2 font-bold text-destructive hover:bg-destructive/5" onClick={handleBulkDelete}>
-                <Trash2 className="w-4 h-4" /> Excluir
-              </Button>
-              <Button size="sm" variant="ghost" className="h-9 w-9 p-0 rounded-xl" onClick={() => setSelectedIds([])}>
-                <X className="w-4 h-4" />
+            <div className="flex items-center justify-between sm:justify-start gap-2 bg-white border shadow-sm p-1.5 rounded-2xl animate-in slide-in-from-right-4">
+              <span className="text-[10px] font-black px-2 text-primary">{selectedIds.length} sel.</span>
+              <div className="h-4 w-px bg-slate-200 mx-1 hidden sm:block" />
+              <div className="flex items-center gap-1">
+                <Button size="sm" variant="ghost" className="h-8 px-2 rounded-xl font-bold text-emerald-600 hover:bg-emerald-50" onClick={handleBulkCheckin}>
+                  <CheckCircle className="w-3.5 h-3.5" />
+                </Button>
+                <Button size="sm" variant="ghost" className="h-8 px-2 rounded-xl font-bold text-blue-600 hover:bg-blue-50" onClick={() => handlePrintBadges()}>
+                  <Printer className="w-3.5 h-3.5" />
+                </Button>
+                <Button size="sm" variant="ghost" className="h-8 px-2 rounded-xl font-bold text-destructive hover:bg-destructive/5" onClick={handleBulkDelete}>
+                  <Trash2 className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+              <Button size="sm" variant="ghost" className="h-8 w-8 p-0 rounded-xl" onClick={() => setSelectedIds([])}>
+                <X className="w-3.5 h-3.5" />
               </Button>
             </div>
           )}
-          <Button onClick={handleOpenAdd} className="h-12 px-6 rounded-2xl font-bold gap-2 shadow-lg shadow-primary/20">
+          <Button onClick={handleOpenAdd} className="h-12 px-6 rounded-2xl font-bold gap-2 shadow-lg shadow-primary/20 w-full sm:w-auto">
             <UserPlus className="w-5 h-5" />
             Novo Participante
           </Button>
@@ -321,140 +323,142 @@ export default function ParticipantsPage() {
       </div>
 
       <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden">
-        <Table>
-          <TableHeader className="bg-slate-50/50">
-            <TableRow className="hover:bg-transparent border-slate-100">
-              <TableHead className="w-14 text-center">
-                <Checkbox 
-                  checked={filtered.length > 0 && selectedIds.length === filtered.length}
-                  onCheckedChange={handleSelectAll}
-                  className="rounded-md"
-                />
-              </TableHead>
-              <TableHead className="font-black text-[10px] uppercase tracking-widest text-slate-400">Participante</TableHead>
-              <TableHead className="font-black text-[10px] uppercase tracking-widest text-slate-400">Documento</TableHead>
-              <TableHead className="font-black text-[10px] uppercase tracking-widest text-slate-400">Categoria</TableHead>
-              <TableHead className="text-center font-black text-[10px] uppercase tracking-widest text-slate-400">Mesa</TableHead>
-              <TableHead className="font-black text-[10px] uppercase tracking-widest text-slate-400">Status</TableHead>
-              <TableHead className="text-right font-black text-[10px] uppercase tracking-widest text-slate-400">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filtered.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center py-24 text-slate-400">
-                  <div className="flex flex-col items-center gap-4">
-                    <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center">
-                      <Search className="w-10 h-10 opacity-20" />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="font-bold text-slate-900">Nenhum participante encontrado</p>
-                      <p className="text-sm">Tente ajustar seus filtros ou busca.</p>
-                    </div>
-                  </div>
-                </TableCell>
+        <div className="overflow-x-auto">
+          <Table className="min-w-[800px] md:min-w-full">
+            <TableHeader className="bg-slate-50/50">
+              <TableRow className="hover:bg-transparent border-slate-100">
+                <TableHead className="w-14 text-center">
+                  <Checkbox 
+                    checked={filtered.length > 0 && selectedIds.length === filtered.length}
+                    onCheckedChange={handleSelectAll}
+                    className="rounded-md"
+                  />
+                </TableHead>
+                <TableHead className="font-black text-[10px] uppercase tracking-widest text-slate-400">Participante</TableHead>
+                <TableHead className="font-black text-[10px] uppercase tracking-widest text-slate-400">Documento</TableHead>
+                <TableHead className="font-black text-[10px] uppercase tracking-widest text-slate-400">Categoria</TableHead>
+                <TableHead className="text-center font-black text-[10px] uppercase tracking-widest text-slate-400">Mesa</TableHead>
+                <TableHead className="font-black text-[10px] uppercase tracking-widest text-slate-400">Status</TableHead>
+                <TableHead className="text-right font-black text-[10px] uppercase tracking-widest text-slate-400">Ações</TableHead>
               </TableRow>
-            ) : (
-              filtered.map((p) => {
-                const category = categories.find(c => c.id === p.categoryId);
-                const isSelected = selectedIds.includes(p.id);
-                return (
-                  <TableRow key={p.id} className={cn(
-                    "group transition-colors border-slate-50",
-                    isSelected ? "bg-primary/5" : "hover:bg-slate-50/50"
-                  )}>
-                    <TableCell className="text-center">
-                      <Checkbox 
-                        checked={isSelected}
-                        onCheckedChange={(checked) => handleSelectOne(p.id, !!checked)}
-                        className="rounded-md"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-400 text-xs">
-                          {p.name.charAt(0)}
-                        </div>
-                        <div>
-                          <div className="font-bold text-slate-900">{p.name}</div>
-                          <div className="text-xs text-slate-400 flex items-center gap-1">
-                            <Mail className="w-3 h-3" /> {p.email || 'Sem e-mail'}
+            </TableHeader>
+            <TableBody>
+              {filtered.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-24 text-slate-400">
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center">
+                        <Search className="w-10 h-10 opacity-20" />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="font-bold text-slate-900">Nenhum participante encontrado</p>
+                        <p className="text-sm">Tente ajustar seus filtros ou busca.</p>
+                      </div>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filtered.map((p) => {
+                  const category = categories.find(c => c.id === p.categoryId);
+                  const isSelected = selectedIds.includes(p.id);
+                  return (
+                    <TableRow key={p.id} className={cn(
+                      "group transition-colors border-slate-50",
+                      isSelected ? "bg-primary/5" : "hover:bg-slate-50/50"
+                    )}>
+                      <TableCell className="text-center">
+                        <Checkbox 
+                          checked={isSelected}
+                          onCheckedChange={(checked) => handleSelectOne(p.id, !!checked)}
+                          className="rounded-md"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-400 text-xs shrink-0">
+                            {p.name.charAt(0)}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="font-bold text-slate-900 truncate max-w-[150px] md:max-w-none">{p.name}</div>
+                            <div className="text-xs text-slate-400 flex items-center gap-1 truncate">
+                              <Mail className="w-3 h-3 shrink-0" /> {p.email || 'Sem e-mail'}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-medium text-slate-600">{p.cpf}</TableCell>
-                    <TableCell>
-                      {category && (
-                        <Badge 
-                          variant="outline" 
-                          className="rounded-full px-3 py-0.5 font-bold text-[10px] uppercase tracking-wider"
-                          style={{ color: category.color, borderColor: `${category.color}30`, backgroundColor: `${category.color}10` }}
-                        >
-                          {category.name}
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <div className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-900 text-white font-black text-xs">
-                        {p.table}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge 
-                        variant={p.status === 'presente' ? 'default' : 'secondary'} 
-                        className={cn(
-                          "rounded-full px-3 py-0.5 font-bold text-[10px] uppercase tracking-wider",
-                          p.status === 'presente' ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-slate-100 text-slate-400'
-                        )}
-                      >
-                        {p.status === 'presente' ? 'Presente' : 'Ausente'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg">
-                            <MoreHorizontal className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48 rounded-2xl p-2">
-                          <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-2 py-1.5">Ações</DropdownMenuLabel>
-                          <DropdownMenuItem className="rounded-xl gap-2 cursor-pointer" onClick={() => {
-                            setSelectedParticipant(p);
-                            setIsQrDialogOpen(true);
-                          }}>
-                            <QrCode className="w-4 h-4" /> QR Code
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="rounded-xl gap-2 cursor-pointer" onClick={() => handlePrintBadges([p.id])}>
-                            <Printer className="w-4 h-4" /> Imprimir Crachá
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="rounded-xl gap-2 cursor-pointer" onClick={() => handleOpenEdit(p)}>
-                            <Edit2 className="w-4 h-4" /> Editar Dados
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator className="my-1" />
-                          <DropdownMenuItem 
-                            className="rounded-xl gap-2 cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/5" 
-                            onClick={() => {
-                              if(confirm(`Excluir ${p.name}?`)) deleteParticipant(p.id);
-                            }}
+                      </TableCell>
+                      <TableCell className="font-medium text-slate-600 whitespace-nowrap">{p.cpf}</TableCell>
+                      <TableCell>
+                        {category && (
+                          <Badge 
+                            variant="outline" 
+                            className="rounded-full px-3 py-0.5 font-bold text-[10px] uppercase tracking-wider whitespace-nowrap"
+                            style={{ color: category.color, borderColor: `${category.color}30`, backgroundColor: `${category.color}10` }}
                           >
-                            <Trash2 className="w-4 h-4" /> Excluir
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
+                            {category.name}
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-900 text-white font-black text-xs">
+                          {p.table}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge 
+                          variant={p.status === 'presente' ? 'default' : 'secondary'} 
+                          className={cn(
+                            "rounded-full px-3 py-0.5 font-bold text-[10px] uppercase tracking-wider whitespace-nowrap",
+                            p.status === 'presente' ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-slate-100 text-slate-400'
+                          )}
+                        >
+                          {p.status === 'presente' ? 'Presente' : 'Ausente'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg">
+                              <MoreHorizontal className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48 rounded-2xl p-2">
+                            <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-2 py-1.5">Ações</DropdownMenuLabel>
+                            <DropdownMenuItem className="rounded-xl gap-2 cursor-pointer" onClick={() => {
+                              setSelectedParticipant(p);
+                              setIsQrDialogOpen(true);
+                            }}>
+                              <QrCode className="w-4 h-4" /> QR Code
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="rounded-xl gap-2 cursor-pointer" onClick={() => handlePrintBadges([p.id])}>
+                              <Printer className="w-4 h-4" /> Imprimir Crachá
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="rounded-xl gap-2 cursor-pointer" onClick={() => handleOpenEdit(p)}>
+                              <Edit2 className="w-4 h-4" /> Editar Dados
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator className="my-1" />
+                            <DropdownMenuItem 
+                              className="rounded-xl gap-2 cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/5" 
+                              onClick={() => {
+                                if(confirm(`Excluir ${p.name}?`)) deleteParticipant(p.id);
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4" /> Excluir
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
       {/* QR Code Dialog */}
       <Dialog open={isQrDialogOpen} onOpenChange={setIsQrDialogOpen}>
-        <DialogContent className="max-w-xs rounded-[2.5rem] p-8">
+        <DialogContent className="max-w-[90vw] sm:max-w-xs rounded-[2.5rem] p-6 sm:p-8">
           <DialogHeader>
             <DialogTitle className="text-center text-xl font-black">Acesso Digital</DialogTitle>
             <VisuallyHidden>
@@ -464,20 +468,21 @@ export default function ParticipantsPage() {
             </VisuallyHidden>
           </DialogHeader>
           {selectedParticipant && (
-            <div className="flex flex-col items-center space-y-8 py-4">
-              <div className="bg-white p-6 rounded-[2rem] shadow-2xl shadow-slate-200 border-2 border-slate-50">
+            <div className="flex flex-col items-center space-y-6 sm:space-y-8 py-4">
+              <div className="bg-white p-4 sm:p-6 rounded-[2rem] shadow-2xl shadow-slate-200 border-2 border-slate-50">
                 <QRCodeSVG 
                   value={selectedParticipant.id} 
-                  size={180}
+                  size={150}
                   level="H"
                   includeMargin={false}
+                  className="sm:w-[180px] sm:h-[180px]"
                 />
               </div>
               <div className="text-center space-y-1">
-                <p className="font-black text-2xl text-slate-900 leading-tight">{selectedParticipant.name}</p>
-                <p className="text-sm font-bold text-primary uppercase tracking-widest">Mesa {selectedParticipant.table}</p>
+                <p className="font-black text-xl sm:text-2xl text-slate-900 leading-tight">{selectedParticipant.name}</p>
+                <p className="text-xs sm:text-sm font-bold text-primary uppercase tracking-widest">Mesa {selectedParticipant.table}</p>
               </div>
-              <Button className="w-full h-14 rounded-2xl font-bold gap-2 shadow-lg shadow-primary/20" onClick={() => window.print()}>
+              <Button className="w-full h-12 sm:h-14 rounded-2xl font-bold gap-2 shadow-lg shadow-primary/20" onClick={() => window.print()}>
                 <Download className="w-5 h-5" />
                 Salvar QR Code
               </Button>
@@ -488,9 +493,9 @@ export default function ParticipantsPage() {
 
       {/* Add/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-lg rounded-[2.5rem] p-8">
+        <DialogContent className="max-w-[95vw] sm:max-w-lg rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-8">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-black">
+            <DialogTitle className="text-xl sm:text-2xl font-black">
               {editingParticipant ? 'Editar Participante' : 'Novo Participante'}
             </DialogTitle>
             <VisuallyHidden>
@@ -499,24 +504,24 @@ export default function ParticipantsPage() {
               </DialogDescription>
             </VisuallyHidden>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-6 py-4">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 py-2 sm:py-4">
             <div className="space-y-2">
               <Label htmlFor="name" className="font-bold text-slate-700 ml-1">Nome Completo</Label>
               <Input 
                 id="name" 
                 required 
-                className="h-12 rounded-xl border-slate-200"
+                className="h-11 sm:h-12 rounded-xl border-slate-200"
                 value={formData.name}
                 onChange={e => setFormData({...formData, name: e.target.value})}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="email" className="font-bold text-slate-700 ml-1">E-mail</Label>
                 <Input 
                   id="email" 
                   type="email" 
-                  className="h-12 rounded-xl border-slate-200"
+                  className="h-11 sm:h-12 rounded-xl border-slate-200"
                   value={formData.email}
                   onChange={e => setFormData({...formData, email: e.target.value})}
                 />
@@ -526,20 +531,20 @@ export default function ParticipantsPage() {
                 <Input 
                   id="cpf" 
                   required 
-                  className="h-12 rounded-xl border-slate-200"
+                  className="h-11 sm:h-12 rounded-xl border-slate-200"
                   value={formData.cpf}
                   onChange={e => setFormData({...formData, cpf: e.target.value})}
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="category" className="font-bold text-slate-700 ml-1">Categoria</Label>
                 <Select 
                   value={formData.categoryId} 
                   onValueChange={v => setFormData({...formData, categoryId: v})}
                 >
-                  <SelectTrigger className="h-12 rounded-xl border-slate-200">
+                  <SelectTrigger className="h-11 sm:h-12 rounded-xl border-slate-200">
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl">
@@ -556,14 +561,14 @@ export default function ParticipantsPage() {
                   type="number" 
                   min="1" 
                   required 
-                  className="h-12 rounded-xl border-slate-200"
+                  className="h-11 sm:h-12 rounded-xl border-slate-200"
                   value={formData.table}
                   onChange={e => setFormData({...formData, table: e.target.value})}
                 />
               </div>
             </div>
             <DialogFooter className="pt-4">
-              <Button type="submit" className="w-full h-14 rounded-2xl font-bold text-lg shadow-lg shadow-primary/20">
+              <Button type="submit" className="w-full h-12 sm:h-14 rounded-2xl font-bold text-base sm:text-lg shadow-lg shadow-primary/20">
                 {editingParticipant ? 'Salvar Alterações' : 'Cadastrar Participante'}
               </Button>
             </DialogFooter>
