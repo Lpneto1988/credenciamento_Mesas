@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "EventCheck - Sistema de Check-in",
+  title: "Orion - Tecnologia para Eventos",
   description: "Check-in rápido e eficiente para eventos",
 };
 

@@ -34,9 +34,9 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     { id: '3', name: 'Cliente', color: '#10b981' },
   ]);
   const [eventSettings, setEventSettings] = useState<EventSettings>({
-    name: 'Meu Grande Evento',
+    name: 'Orion Event Experience',
     date: new Date().toISOString().split('T')[0],
-    location: 'Centro de Convenções',
+    location: 'Centro de Convenções Orion',
     totalTables: 20,
     capacityPerTable: 10
   });

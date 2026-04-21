@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { LogIn } from "lucide-react";
+import Image from "next/image";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -23,44 +23,54 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-      <Card className="w-full max-w-md shadow-xl border-t-4 border-t-primary">
-        <CardHeader className="space-y-1 text-center">
-          <div className="mx-auto bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mb-2">
-            <LogIn className="text-primary" size={24} />
+      <Card className="w-full max-w-md shadow-2xl border-none rounded-[2.5rem] overflow-hidden">
+        <CardHeader className="space-y-4 text-center pt-12">
+          <div className="mx-auto relative w-32 h-32 mb-2">
+            <Image 
+              src="/logo.png" 
+              alt="Orion Logo" 
+              fill 
+              className="object-contain"
+              priority
+            />
           </div>
-          <CardTitle className="text-2xl font-bold">EventCheck</CardTitle>
-          <CardDescription>Entre para gerenciar o evento</CardDescription>
+          <div className="space-y-1">
+            <CardTitle className="text-3xl font-black tracking-tighter">ORION</CardTitle>
+            <CardDescription className="font-medium text-slate-500 uppercase tracking-widest text-[10px]">Tecnologia para Eventos</CardDescription>
+          </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6 pb-12 px-10">
           <div className="space-y-2">
-            <Label htmlFor="email">E-mail</Label>
+            <Label htmlFor="email" className="font-bold ml-1">E-mail</Label>
             <Input 
               id="email" 
               type="email" 
               placeholder="exemplo@email.com" 
+              className="h-12 rounded-2xl border-slate-200 focus-visible:ring-primary/20"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Senha</Label>
+            <Label htmlFor="password" className="font-bold ml-1">Senha</Label>
             <Input 
               id="password" 
               type="password" 
+              className="h-12 rounded-2xl border-slate-200 focus-visible:ring-primary/20"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
           <div className="grid grid-cols-2 gap-4 pt-2">
-            <Button onClick={() => handleLogin('operator')} variant="outline" className="w-full">
+            <Button onClick={() => handleLogin('operator')} variant="outline" className="h-14 rounded-2xl font-bold border-2">
               Operador
             </Button>
-            <Button onClick={() => handleLogin('admin')} className="w-full">
+            <Button onClick={() => handleLogin('admin')} className="h-14 rounded-2xl font-bold shadow-lg shadow-primary/20">
               Administrador
             </Button>
           </div>
-          <p className="text-xs text-center text-muted-foreground mt-4">
-            Dica: Use qualquer e-mail/senha para testar.
+          <p className="text-[10px] text-center text-slate-400 font-medium uppercase tracking-wider">
+            Acesso restrito a organizadores
           </p>
         </CardContent>
       </Card>
