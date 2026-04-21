@@ -24,3 +24,10 @@ export interface Participant {
   checkinTime?: string;
   operatorId?: string;
 }
+
+export interface EventSettings {
+  name: string;
+  date: string;
+  location: string;
+  totalTables: number;
+}

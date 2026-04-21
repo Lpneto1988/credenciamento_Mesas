@@ -12,7 +12,8 @@ import {
   FileText, 
   LogOut, 
   Menu,
-  CheckCircle2
+  CheckCircle2,
+  Settings
 } from "lucide-react";
 import { 
   Sheet, 
@@ -43,6 +44,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { name: 'Categorias', href: '/dashboard/categories', icon: Tags, roles: ['admin'] },
     { name: 'Importar', href: '/dashboard/import', icon: Upload, roles: ['admin'] },
     { name: 'Relatórios', href: '/dashboard/reports', icon: FileText, roles: ['admin'] },
+    { name: 'Configurações', href: '/dashboard/settings', icon: Settings, roles: ['admin'] },
   ];
 
   const filteredNav = navItems.filter(item => item.roles.includes(currentUser.role));

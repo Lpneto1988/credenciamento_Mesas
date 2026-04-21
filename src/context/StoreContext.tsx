@@ -1,13 +1,14 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User, Participant, Category, UserRole } from '@/types';
+import { User, Participant, Category, UserRole, EventSettings } from '@/types';
 import { toast } from 'sonner';
 
 interface StoreContextType {
   currentUser: User | null;
   participants: Participant[];
   categories: Category[];
+  eventSettings: EventSettings;
   login: (email: string, role: UserRole) => void;
   logout: () => void;
   addParticipant: (p: Omit<Participant, 'id' | 'status'>) => void;
@@ -16,6 +17,7 @@ interface StoreContextType {
   performCheckin: (participantId: string) => void;
   addCategory: (c: Omit<Category, 'id'>) => string;
   deleteCategory: (id: string) => void;
+  updateSettings: (s: EventSettings) => void;
   importParticipants: (data: any[]) => { success: number; errors: string[] };
 }
 
@@ -29,21 +31,30 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     { id: '2', name: 'Imprensa', color: '#3b82f6' },
     { id: '3', name: 'Cliente', color: '#10b981' },
   ]);
+  const [eventSettings, setEventSettings] = useState<EventSettings>({
+    name: 'Meu Grande Evento',
+    date: new Date().toISOString().split('T')[0],
+    location: 'Centro de Convenções',
+    totalTables: 20
+  });
 
   useEffect(() => {
     const savedParticipants = localStorage.getItem('event_participants');
     const savedCategories = localStorage.getItem('event_categories');
     const savedUser = localStorage.getItem('event_user');
+    const savedSettings = localStorage.getItem('event_settings');
 
     if (savedParticipants) setParticipants(JSON.parse(savedParticipants));
     if (savedCategories) setCategories(JSON.parse(savedCategories));
     if (savedUser) setCurrentUser(JSON.parse(savedUser));
+    if (savedSettings) setEventSettings(JSON.parse(savedSettings));
   }, []);
 
   useEffect(() => {
     localStorage.setItem('event_participants', JSON.stringify(participants));
     localStorage.setItem('event_categories', JSON.stringify(categories));
-  }, [participants, categories]);
+    localStorage.setItem('event_settings', JSON.stringify(eventSettings));
+  }, [participants, categories, eventSettings]);
 
   const login = (email: string, role: UserRole) => {
     const user = { id: Math.random().toString(), name: email.split('@')[0], email, role };
@@ -110,6 +121,11 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     toast.success("Categoria removida");
   };
 
+  const updateSettings = (s: EventSettings) => {
+    setEventSettings(s);
+    toast.success("Configurações salvas");
+  };
+
   const importParticipants = (data: any[]) => {
     let success = 0;
     const errors: string[] = [];
@@ -130,8 +146,8 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       const mesaNum = parseInt(mesa);
-      if (isNaN(mesaNum) || mesaNum < 1 || mesaNum > 20) {
-        errors.push(`Linha ${index + 1}: Mesa ${mesa} inválida (deve ser entre 1 e 20)`);
+      if (isNaN(mesaNum) || mesaNum < 1 || mesaNum > eventSettings.totalTables) {
+        errors.push(`Linha ${index + 1}: Mesa ${mesa} inválida (deve ser entre 1 e ${eventSettings.totalTables})`);
         return;
       }
 
@@ -160,9 +176,9 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <StoreContext.Provider value={{ 
-      currentUser, participants, categories, login, logout, 
+      currentUser, participants, categories, eventSettings, login, logout, 
       addParticipant, updateParticipant, deleteParticipant, 
-      performCheckin, addCategory, deleteCategory, importParticipants 
+      performCheckin, addCategory, deleteCategory, updateSettings, importParticipants 
     }}>
       {children}
     </StoreContext.Provider>
