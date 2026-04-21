@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useStore } from "@/context/StoreContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
 
@@ -33,10 +33,6 @@ export default function LoginPage() {
               className="object-contain"
               priority
             />
-          </div>
-          <div className="space-y-1">
-            <CardTitle className="text-3xl font-black tracking-tighter">ORION</CardTitle>
-            <CardDescription className="font-medium text-slate-500 uppercase tracking-widest text-[10px]">Tecnologia para Eventos</CardDescription>
           </div>
         </CardHeader>
         <CardContent className="space-y-6 pb-12 px-10">
