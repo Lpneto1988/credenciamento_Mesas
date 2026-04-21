@@ -129,7 +129,7 @@ export default function ParticipantsPage() {
           <div class="badge-card">
             <div class="badge-header" style="background-color: ${category?.color || '#000'}"></div>
             <div class="badge-content">
-              <div class="event-name">EVENTCHECK 2024</div>
+              <div class="event-name">ORION EVENT TECHNOLOGY</div>
               <div class="participant-name">${p.name}</div>
               <div class="participant-category">${category?.name || 'Participante'}</div>
               <div class="qr-placeholder">
@@ -148,16 +148,16 @@ export default function ParticipantsPage() {
           <style>
             body { font-family: 'Inter', sans-serif; margin: 0; padding: 20px; background: #f4f4f4; }
             .badge-container { display: inline-block; margin: 10px; page-break-inside: avoid; }
-            .badge-card { width: 300px; height: 450px; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); position: relative; border: 1px solid #eee; }
-            .badge-header { height: 15px; width: 100%; }
+            .badge-card { width: 300px; height: 450px; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); position: relative; border: 1px solid #eee; }
+            .badge-header { height: 8px; width: 100%; }
             .badge-content { padding: 30px; text-align: center; display: flex; flex-direction: column; align-items: center; height: 100%; box-sizing: border-box; }
-            .event-name { font-size: 10px; font-weight: 900; letter-spacing: 3px; color: #999; margin-bottom: 40px; }
-            .participant-name { font-size: 24px; font-weight: 800; color: #111; margin-bottom: 5px; line-height: 1.2; }
-            .participant-category { font-size: 12px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 30px; }
-            .qr-placeholder { width: 120px; height: 120px; margin-bottom: 30px; padding: 10px; border: 1px solid #eee; border-radius: 15px; }
+            .event-name { font-size: 9px; font-weight: 800; letter-spacing: 2px; color: #999; margin-bottom: 40px; }
+            .participant-name { font-size: 22px; font-weight: 700; color: #111; margin-bottom: 4px; line-height: 1.2; }
+            .participant-category { font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 30px; }
+            .qr-placeholder { width: 110px; height: 110px; margin-bottom: 30px; padding: 8px; border: 1px solid #eee; border-radius: 8px; }
             .qr-placeholder img { width: 100%; height: 100%; }
-            .table-info { margin-top: auto; font-size: 12px; font-weight: 700; color: #999; }
-            .table-info span { display: block; font-size: 48px; font-weight: 900; color: #000; line-height: 1; }
+            .table-info { margin-top: auto; font-size: 11px; font-weight: 700; color: #999; }
+            .table-info span { display: block; font-size: 42px; font-weight: 800; color: #000; line-height: 1; }
             @media print { 
               body { background: white; padding: 0; }
               .badge-card { box-shadow: none; border: 1px solid #ddd; margin: 0; }
@@ -210,99 +210,60 @@ export default function ParticipantsPage() {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-black tracking-tight text-slate-900">Participantes</h1>
-          <p className="text-sm md:text-base text-slate-500">Gerencie a lista de convidados e emita credenciais.</p>
+          <h1 className="text-2xl font-bold text-slate-900">Participantes</h1>
+          <p className="text-sm text-slate-500">Gestão completa da lista de convidados.</p>
         </div>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           {selectedIds.length > 0 && (
-            <div className="flex items-center justify-between sm:justify-start gap-2 bg-white border shadow-sm p-1.5 rounded-2xl animate-in slide-in-from-right-4">
-              <span className="text-[10px] font-black px-2 text-primary">{selectedIds.length} sel.</span>
+            <div className="flex items-center justify-between sm:justify-start gap-2 bg-white border border-slate-200 shadow-sm p-1 rounded-xl animate-in slide-in-from-right-4">
+              <span className="text-[10px] font-bold px-2 text-slate-500">{selectedIds.length} selecionados</span>
               <div className="h-4 w-px bg-slate-200 mx-1 hidden sm:block" />
               <div className="flex items-center gap-1">
-                <Button size="sm" variant="ghost" className="h-8 px-2 rounded-xl font-bold text-emerald-600 hover:bg-emerald-50" onClick={handleBulkCheckin}>
+                <Button size="sm" variant="ghost" className="h-8 px-2 rounded-lg font-bold text-emerald-600 hover:bg-emerald-50" onClick={handleBulkCheckin}>
                   <CheckCircle className="w-3.5 h-3.5" />
                 </Button>
                 <Button size="sm" variant="ghost" className="h-8 px-2 rounded-xl font-bold text-blue-600 hover:bg-blue-50" onClick={() => handlePrintBadges()}>
                   <Printer className="w-3.5 h-3.5" />
                 </Button>
-                <Button size="sm" variant="ghost" className="h-8 px-2 rounded-xl font-bold text-destructive hover:bg-destructive/5" onClick={handleBulkDelete}>
+                <Button size="sm" variant="ghost" className="h-8 px-2 rounded-lg font-bold text-destructive hover:bg-destructive/5" onClick={handleBulkDelete}>
                   <Trash2 className="w-3.5 h-3.5" />
                 </Button>
               </div>
-              <Button size="sm" variant="ghost" className="h-8 w-8 p-0 rounded-xl" onClick={() => setSelectedIds([])}>
+              <Button size="sm" variant="ghost" className="h-8 w-8 p-0 rounded-lg" onClick={() => setSelectedIds([])}>
                 <X className="w-3.5 h-3.5" />
               </Button>
             </div>
           )}
-          <Button onClick={handleOpenAdd} className="h-12 px-6 rounded-2xl font-bold gap-2 shadow-lg shadow-primary/20 w-full sm:w-auto">
-            <UserPlus className="w-5 h-5" />
+          <Button onClick={handleOpenAdd} className="h-10 px-4 rounded-lg font-bold gap-2 shadow-sm w-full sm:w-auto">
+            <UserPlus className="w-4 h-4" />
             Novo Participante
           </Button>
         </div>
       </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="border-none shadow-sm bg-white rounded-2xl p-4 flex items-center gap-4">
-          <div className="bg-slate-100 p-3 rounded-xl">
-            <Users className="w-5 h-5 text-slate-600" />
-          </div>
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Filtrados</p>
-            <p className="text-xl font-black text-slate-900">{stats.total}</p>
-          </div>
-        </Card>
-        <Card className="border-none shadow-sm bg-white rounded-2xl p-4 flex items-center gap-4">
-          <div className="bg-emerald-50 p-3 rounded-xl">
-            <UserCheck className="w-5 h-5 text-emerald-600" />
-          </div>
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Presentes</p>
-            <p className="text-xl font-black text-slate-900">{stats.present}</p>
-          </div>
-        </Card>
-        <Card className="border-none shadow-sm bg-white rounded-2xl p-4 flex items-center gap-4">
-          <div className="bg-amber-50 p-3 rounded-xl">
-            <UserX className="w-5 h-5 text-amber-600" />
-          </div>
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-amber-400">Ausentes</p>
-            <p className="text-xl font-black text-slate-900">{stats.absent}</p>
-          </div>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
         <div className="md:col-span-2 relative group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 group-focus-within:text-primary transition-colors" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 group-focus-within:text-slate-900 transition-colors" />
           <Input 
-            className="h-12 pl-12 pr-10 rounded-2xl border-slate-200 bg-white shadow-sm focus-visible:ring-primary/20"
+            className="h-10 pl-10 pr-10 rounded-lg border-slate-200 bg-white shadow-sm focus-visible:ring-slate-900/10"
             placeholder="Buscar por nome ou CPF..."
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
-          {search && (
-            <button 
-              onClick={() => setSearch("")}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-900"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
         </div>
 
         <Select value={filterCategory} onValueChange={setFilterCategory}>
-          <SelectTrigger className="h-12 rounded-2xl border-slate-200 bg-white shadow-sm">
+          <SelectTrigger className="h-10 rounded-lg border-slate-200 bg-white shadow-sm">
             <div className="flex items-center gap-2">
-              <Filter className="w-4 h-4 opacity-50" />
+              <Filter className="w-3.5 h-3.5 opacity-50" />
               <SelectValue placeholder="Categoria" />
             </div>
           </SelectTrigger>
-          <SelectContent className="rounded-2xl">
+          <SelectContent className="rounded-lg">
             <SelectItem value="all">Todas Categorias</SelectItem>
             {categories.map(c => (
               <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
@@ -311,10 +272,10 @@ export default function ParticipantsPage() {
         </Select>
 
         <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="h-12 rounded-2xl border-slate-200 bg-white shadow-sm">
+          <SelectTrigger className="h-10 rounded-lg border-slate-200 bg-white shadow-sm">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
-          <SelectContent className="rounded-2xl">
+          <SelectContent className="rounded-lg">
             <SelectItem value="all">Todos Status</SelectItem>
             <SelectItem value="presente">Presentes</SelectItem>
             <SelectItem value="ausente">Ausentes</SelectItem>
@@ -322,38 +283,33 @@ export default function ParticipantsPage() {
         </Select>
       </div>
 
-      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden">
-        <div className="overflow-x-auto">
+      <Card className="border-slate-200 shadow-sm overflow-hidden">
+        <div className="overflow-x-auto custom-scrollbar">
           <Table className="min-w-[800px] md:min-w-full">
             <TableHeader className="bg-slate-50/50">
               <TableRow className="hover:bg-transparent border-slate-100">
-                <TableHead className="w-14 text-center">
+                <TableHead className="w-12 text-center">
                   <Checkbox 
                     checked={filtered.length > 0 && selectedIds.length === filtered.length}
                     onCheckedChange={handleSelectAll}
-                    className="rounded-md"
+                    className="rounded"
                   />
                 </TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-slate-400">Participante</TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-slate-400">Documento</TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-slate-400">Categoria</TableHead>
-                <TableHead className="text-center font-black text-[10px] uppercase tracking-widest text-slate-400">Mesa</TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-slate-400">Status</TableHead>
-                <TableHead className="text-right font-black text-[10px] uppercase tracking-widest text-slate-400">Ações</TableHead>
+                <TableHead className="font-bold text-[10px] uppercase tracking-widest text-slate-400 py-3">Participante</TableHead>
+                <TableHead className="font-bold text-[10px] uppercase tracking-widest text-slate-400 py-3">Documento</TableHead>
+                <TableHead className="font-bold text-[10px] uppercase tracking-widest text-slate-400 py-3">Categoria</TableHead>
+                <TableHead className="text-center font-bold text-[10px] uppercase tracking-widest text-slate-400 py-3">Mesa</TableHead>
+                <TableHead className="font-bold text-[10px] uppercase tracking-widest text-slate-400 py-3">Status</TableHead>
+                <TableHead className="text-right font-bold text-[10px] uppercase tracking-widest text-slate-400 py-3">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-24 text-slate-400">
-                    <div className="flex flex-col items-center gap-4">
-                      <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center">
-                        <Search className="w-10 h-10 opacity-20" />
-                      </div>
-                      <div className="space-y-1">
-                        <p className="font-bold text-slate-900">Nenhum participante encontrado</p>
-                        <p className="text-sm">Tente ajustar seus filtros ou busca.</p>
-                      </div>
+                  <TableCell colSpan={7} className="text-center py-20 text-slate-400">
+                    <div className="flex flex-col items-center gap-3">
+                      <Search className="w-8 h-8 opacity-10" />
+                      <p className="text-xs font-medium">Nenhum participante encontrado</p>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -364,50 +320,50 @@ export default function ParticipantsPage() {
                   return (
                     <TableRow key={p.id} className={cn(
                       "group transition-colors border-slate-50",
-                      isSelected ? "bg-primary/5" : "hover:bg-slate-50/50"
+                      isSelected ? "bg-slate-50" : "hover:bg-slate-50/30"
                     )}>
                       <TableCell className="text-center">
                         <Checkbox 
                           checked={isSelected}
                           onCheckedChange={(checked) => handleSelectOne(p.id, !!checked)}
-                          className="rounded-md"
+                          className="rounded"
                         />
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="py-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-400 text-xs shrink-0">
-                            {p.name.charAt(0)}
+                          <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center font-bold text-slate-400 text-[10px] shrink-0">
+                            {p.name.charAt(0).toUpperCase()}
                           </div>
                           <div className="min-w-0">
-                            <div className="font-bold text-slate-900 truncate max-w-[150px] md:max-w-none">{p.name}</div>
-                            <div className="text-xs text-slate-400 flex items-center gap-1 truncate">
-                              <Mail className="w-3 h-3 shrink-0" /> {p.email || 'Sem e-mail'}
+                            <div className="font-bold text-slate-900 text-sm truncate max-w-[150px] md:max-w-none">{p.name}</div>
+                            <div className="text-[10px] text-slate-400 flex items-center gap-1 truncate">
+                              <Mail className="w-2.5 h-2.5 shrink-0" /> {p.email || 'Sem e-mail'}
                             </div>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="font-medium text-slate-600 whitespace-nowrap">{p.cpf}</TableCell>
+                      <TableCell className="font-medium text-slate-600 text-xs whitespace-nowrap">{p.cpf}</TableCell>
                       <TableCell>
                         {category && (
                           <Badge 
                             variant="outline" 
-                            className="rounded-full px-3 py-0.5 font-bold text-[10px] uppercase tracking-wider whitespace-nowrap"
-                            style={{ color: category.color, borderColor: `${category.color}30`, backgroundColor: `${category.color}10` }}
+                            className="rounded-md px-2 py-0 font-bold text-[9px] uppercase tracking-wider whitespace-nowrap"
+                            style={{ color: category.color, borderColor: `${category.color}20`, backgroundColor: `${category.color}05` }}
                           >
                             {category.name}
                           </Badge>
                         )}
                       </TableCell>
                       <TableCell className="text-center">
-                        <div className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-900 text-white font-black text-xs">
+                        <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-slate-100 text-slate-900 font-bold text-[10px]">
                           {p.table}
-                        </div>
+                        </span>
                       </TableCell>
                       <TableCell>
                         <Badge 
                           variant={p.status === 'presente' ? 'default' : 'secondary'} 
                           className={cn(
-                            "rounded-full px-3 py-0.5 font-bold text-[10px] uppercase tracking-wider whitespace-nowrap",
+                            "rounded-md px-2 py-0 font-bold text-[9px] uppercase tracking-wider whitespace-nowrap",
                             p.status === 'presente' ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-slate-100 text-slate-400'
                           )}
                         >
@@ -417,32 +373,32 @@ export default function ParticipantsPage() {
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg">
-                              <MoreHorizontal className="w-4 h-4" />
+                            <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg">
+                              <MoreHorizontal className="w-3.5 h-3.5" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-48 rounded-2xl p-2">
-                            <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-2 py-1.5">Ações</DropdownMenuLabel>
-                            <DropdownMenuItem className="rounded-xl gap-2 cursor-pointer" onClick={() => {
+                          <DropdownMenuContent align="end" className="w-44 rounded-xl p-1.5">
+                            <DropdownMenuLabel className="text-[9px] font-bold uppercase tracking-widest text-slate-400 px-2 py-1">Opções</DropdownMenuLabel>
+                            <DropdownMenuItem className="rounded-lg gap-2 cursor-pointer text-xs" onClick={() => {
                               setSelectedParticipant(p);
                               setIsQrDialogOpen(true);
                             }}>
-                              <QrCode className="w-4 h-4" /> QR Code
+                              <QrCode className="w-3.5 h-3.5" /> QR Code
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="rounded-xl gap-2 cursor-pointer" onClick={() => handlePrintBadges([p.id])}>
-                              <Printer className="w-4 h-4" /> Imprimir Crachá
+                            <DropdownMenuItem className="rounded-lg gap-2 cursor-pointer text-xs" onClick={() => handlePrintBadges([p.id])}>
+                              <Printer className="w-3.5 h-3.5" /> Imprimir Crachá
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="rounded-xl gap-2 cursor-pointer" onClick={() => handleOpenEdit(p)}>
-                              <Edit2 className="w-4 h-4" /> Editar Dados
+                            <DropdownMenuItem className="rounded-lg gap-2 cursor-pointer text-xs" onClick={() => handleOpenEdit(p)}>
+                              <Edit2 className="w-3.5 h-3.5" /> Editar Dados
                             </DropdownMenuItem>
                             <DropdownMenuSeparator className="my-1" />
                             <DropdownMenuItem 
-                              className="rounded-xl gap-2 cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/5" 
+                              className="rounded-lg gap-2 cursor-pointer text-xs text-destructive focus:text-destructive focus:bg-destructive/5" 
                               onClick={() => {
                                 if(confirm(`Excluir ${p.name}?`)) deleteParticipant(p.id);
                               }}
                             >
-                              <Trash2 className="w-4 h-4" /> Excluir
+                              <Trash2 className="w-3.5 h-3.5" /> Excluir
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -454,36 +410,33 @@ export default function ParticipantsPage() {
             </TableBody>
           </Table>
         </div>
-      </div>
+      </Card>
 
       {/* QR Code Dialog */}
       <Dialog open={isQrDialogOpen} onOpenChange={setIsQrDialogOpen}>
-        <DialogContent className="max-w-[90vw] sm:max-w-xs rounded-[2.5rem] p-6 sm:p-8">
+        <DialogContent className="max-w-[90vw] sm:max-w-xs rounded-2xl p-6">
           <DialogHeader>
-            <DialogTitle className="text-center text-xl font-black">Acesso Digital</DialogTitle>
+            <DialogTitle className="text-center text-lg font-bold">Acesso Digital</DialogTitle>
             <VisuallyHidden>
-              <DialogDescription>
-                Visualização do QR Code de acesso para o participante selecionado.
-              </DialogDescription>
+              <DialogDescription>QR Code de acesso.</DialogDescription>
             </VisuallyHidden>
           </DialogHeader>
           {selectedParticipant && (
-            <div className="flex flex-col items-center space-y-6 sm:space-y-8 py-4">
-              <div className="bg-white p-4 sm:p-6 rounded-[2rem] shadow-2xl shadow-slate-200 border-2 border-slate-50">
+            <div className="flex flex-col items-center space-y-6 py-2">
+              <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
                 <QRCodeSVG 
                   value={selectedParticipant.id} 
-                  size={150}
+                  size={140}
                   level="H"
                   includeMargin={false}
-                  className="sm:w-[180px] sm:h-[180px]"
                 />
               </div>
-              <div className="text-center space-y-1">
-                <p className="font-black text-xl sm:text-2xl text-slate-900 leading-tight">{selectedParticipant.name}</p>
-                <p className="text-xs sm:text-sm font-bold text-primary uppercase tracking-widest">Mesa {selectedParticipant.table}</p>
+              <div className="text-center">
+                <p className="font-bold text-lg text-slate-900 leading-tight">{selectedParticipant.name}</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Mesa {selectedParticipant.table}</p>
               </div>
-              <Button className="w-full h-12 sm:h-14 rounded-2xl font-bold gap-2 shadow-lg shadow-primary/20" onClick={() => window.print()}>
-                <Download className="w-5 h-5" />
+              <Button className="w-full h-11 rounded-lg font-bold gap-2 shadow-sm" onClick={() => window.print()}>
+                <Download className="w-4 h-4" />
                 Salvar QR Code
               </Button>
             </div>
@@ -493,82 +446,80 @@ export default function ParticipantsPage() {
 
       {/* Add/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-[95vw] sm:max-w-lg rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-8">
+        <DialogContent className="max-w-[95vw] sm:max-w-lg rounded-2xl p-6">
           <DialogHeader>
-            <DialogTitle className="text-xl sm:text-2xl font-black">
+            <DialogTitle className="text-xl font-bold">
               {editingParticipant ? 'Editar Participante' : 'Novo Participante'}
             </DialogTitle>
             <VisuallyHidden>
-              <DialogDescription>
-                Formulário para cadastrar ou editar informações de um participante do evento.
-              </DialogDescription>
+              <DialogDescription>Formulário de cadastro.</DialogDescription>
             </VisuallyHidden>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 py-2 sm:py-4">
-            <div className="space-y-2">
-              <Label htmlFor="name" className="font-bold text-slate-700 ml-1">Nome Completo</Label>
+          <form onSubmit={handleSubmit} className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="name" className="text-xs font-bold text-slate-700 ml-0.5">Nome Completo</Label>
               <Input 
                 id="name" 
                 required 
-                className="h-11 sm:h-12 rounded-xl border-slate-200"
+                className="h-10 rounded-lg border-slate-200"
                 value={formData.name}
                 onChange={e => setFormData({...formData, name: e.target.value})}
               />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="font-bold text-slate-700 ml-1">E-mail</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-xs font-bold text-slate-700 ml-0.5">E-mail</Label>
                 <Input 
                   id="email" 
                   type="email" 
-                  className="h-11 sm:h-12 rounded-xl border-slate-200"
+                  className="h-10 rounded-lg border-slate-200"
                   value={formData.email}
                   onChange={e => setFormData({...formData, email: e.target.value})}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="cpf" className="font-bold text-slate-700 ml-1">CPF</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="cpf" className="text-xs font-bold text-slate-700 ml-0.5">CPF</Label>
                 <Input 
                   id="cpf" 
                   required 
-                  className="h-11 sm:h-12 rounded-xl border-slate-200"
+                  className="h-10 rounded-lg border-slate-200"
                   value={formData.cpf}
                   onChange={e => setFormData({...formData, cpf: e.target.value})}
                 />
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="category" className="font-bold text-slate-700 ml-1">Categoria</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="category" className="text-xs font-bold text-slate-700 ml-0.5">Categoria</Label>
                 <Select 
                   value={formData.categoryId} 
                   onValueChange={v => setFormData({...formData, categoryId: v})}
                 >
-                  <SelectTrigger className="h-11 sm:h-12 rounded-xl border-slate-200">
+                  <SelectTrigger className="h-10 rounded-lg border-slate-200">
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
-                  <SelectContent className="rounded-xl">
+                  <SelectContent className="rounded-lg">
                     {categories.map(c => (
                       <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="table" className="font-bold text-slate-700 ml-1">Mesa</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="table" className="text-xs font-bold text-slate-700 ml-0.5">Mesa</Label>
                 <Input 
                   id="table" 
                   type="number" 
                   min="1" 
                   required 
-                  className="h-11 sm:h-12 rounded-xl border-slate-200"
+                  className="h-10 rounded-lg border-slate-200"
                   value={formData.table}
                   onChange={e => setFormData({...formData, table: e.target.value})}
                 />
               </div>
             </div>
             <DialogFooter className="pt-4">
-              <Button type="submit" className="w-full h-12 sm:h-14 rounded-2xl font-bold text-base sm:text-lg shadow-lg shadow-primary/20">
+              <Button type="submit" className="w-full h-11 rounded-lg font-bold text-sm shadow-sm">
                 {editingParticipant ? 'Salvar Alterações' : 'Cadastrar Participante'}
               </Button>
             </DialogFooter>

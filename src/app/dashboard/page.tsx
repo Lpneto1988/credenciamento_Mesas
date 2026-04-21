@@ -10,7 +10,8 @@ import {
   TrendingUp, 
   ArrowUpRight,
   Calendar as CalendarIcon,
-  MapPin
+  MapPin,
+  Activity
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -31,162 +32,157 @@ export default function DashboardHome() {
     .slice(0, 5);
 
   return (
-    <div className="space-y-6 md:space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-black tracking-tight text-slate-900">Olá, Bem-vindo!</h1>
-          <p className="text-sm md:text-base text-slate-500">Aqui está o resumo do seu evento em tempo real.</p>
+          <h1 className="text-2xl font-bold text-slate-900">Visão Geral</h1>
+          <p className="text-sm text-slate-500">Acompanhe o status do evento em tempo real.</p>
         </div>
-        <div className="flex items-center gap-3 bg-white p-2 rounded-2xl shadow-sm border border-slate-100 w-fit">
-          <div className="bg-primary/10 p-2 rounded-xl">
-            <CalendarIcon className="w-4 h-4 md:w-5 h-5 text-primary" />
-          </div>
-          <div className="pr-4">
-            <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Data do Evento</p>
-            <p className="text-xs md:text-sm font-bold text-slate-700">
-              {eventSettings.date ? format(new Date(eventSettings.date), "dd 'de' MMMM", { locale: ptBR }) : 'Não definida'}
-            </p>
+        <div className="flex items-center gap-4 text-sm">
+          <div className="flex items-center gap-2 text-slate-600 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
+            <CalendarIcon className="w-4 h-4 text-slate-400" />
+            <span className="font-medium">
+              {eventSettings.date ? format(new Date(eventSettings.date), "dd 'de' MMMM, yyyy", { locale: ptBR }) : 'Data não definida'}
+            </span>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        <Card className="border-none shadow-sm bg-white rounded-3xl overflow-hidden group">
-          <CardContent className="p-5 md:p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-blue-50 p-3 rounded-2xl group-hover:scale-110 transition-transform">
-                <Users className="text-blue-600 w-5 h-5 md:w-6 h-6" />
-              </div>
-              <Badge className="bg-blue-100 text-blue-700 border-none text-[10px]">Total</Badge>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="border-slate-200 shadow-sm overflow-hidden">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Inscritos</p>
+              <Users className="text-slate-400 w-4 h-4" />
             </div>
-            <p className="text-3xl md:text-4xl font-black text-slate-900">{total}</p>
-            <p className="text-xs md:text-sm text-slate-500 mt-1 font-medium">Participantes inscritos</p>
+            <div className="flex items-baseline gap-2">
+              <h3 className="text-2xl font-bold text-slate-900">{total}</h3>
+              <span className="text-[10px] font-medium text-slate-400">participantes</span>
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="border-none shadow-sm bg-white rounded-3xl overflow-hidden group">
-          <CardContent className="p-5 md:p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-emerald-50 p-3 rounded-2xl group-hover:scale-110 transition-transform">
-                <CheckCircle2 className="text-emerald-600 w-5 h-5 md:w-6 h-6" />
-              </div>
-              <Badge className="bg-emerald-100 text-emerald-700 border-none text-[10px]">Presentes</Badge>
+        <Card className="border-slate-200 shadow-sm overflow-hidden">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Presentes</p>
+              <CheckCircle2 className="text-emerald-500 w-4 h-4" />
             </div>
-            <p className="text-3xl md:text-4xl font-black text-slate-900">{present}</p>
-            <p className="text-xs md:text-sm text-slate-500 mt-1 font-medium">Check-ins realizados</p>
+            <div className="flex items-baseline gap-2">
+              <h3 className="text-2xl font-bold text-slate-900">{present}</h3>
+              <Badge variant="secondary" className="bg-emerald-50 text-emerald-700 border-emerald-100 text-[10px] px-1.5 py-0">
+                {total > 0 ? Math.round((present/total)*100) : 0}%
+              </Badge>
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="border-none shadow-sm bg-white rounded-3xl overflow-hidden group">
-          <CardContent className="p-5 md:p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-amber-50 p-3 rounded-2xl group-hover:scale-110 transition-transform">
-                <Clock className="text-amber-600 w-5 h-5 md:w-6 h-6" />
-              </div>
-              <Badge className="bg-amber-100 text-amber-700 border-none text-[10px]">Ausentes</Badge>
+        <Card className="border-slate-200 shadow-sm overflow-hidden">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Ausentes</p>
+              <Clock className="text-amber-500 w-4 h-4" />
             </div>
-            <p className="text-3xl md:text-4xl font-black text-slate-900">{total - present}</p>
-            <p className="text-xs md:text-sm text-slate-500 mt-1 font-medium">Aguardando chegada</p>
+            <div className="flex items-baseline gap-2">
+              <h3 className="text-2xl font-bold text-slate-900">{total - present}</h3>
+              <span className="text-[10px] font-medium text-slate-400">aguardando</span>
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="border-none shadow-xl bg-primary text-primary-foreground rounded-3xl overflow-hidden">
-          <CardContent className="p-5 md:p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-white/20 backdrop-blur-sm p-3 rounded-2xl">
-                <TrendingUp className="w-5 h-5 md:w-6 h-6" />
-              </div>
-              <span className="text-[10px] font-black uppercase tracking-widest opacity-70">Taxa de Ocupação</span>
+        <Card className="border-slate-900 bg-slate-900 text-white shadow-md overflow-hidden">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-semibold text-slate-300 uppercase tracking-wider">Ocupação</p>
+              <TrendingUp className="text-slate-400 w-4 h-4" />
             </div>
-            <p className="text-3xl md:text-4xl font-black">{Math.round(progress)}%</p>
-            <Progress value={progress} className="h-2 bg-white/20 mt-4" />
+            <h3 className="text-2xl font-bold">{Math.round(progress)}%</h3>
+            <Progress value={progress} className="h-1.5 bg-white/10 mt-3" />
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <Card className="border-none shadow-sm bg-white rounded-3xl">
-            <CardHeader className="flex flex-row items-center justify-between p-5 md:p-6">
-              <CardTitle className="text-lg md:text-xl font-black">Ações Rápidas</CardTitle>
+          <Card className="border-slate-200 shadow-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-bold flex items-center gap-2">
+                <Activity className="w-4 h-4 text-slate-400" />
+                Ações Rápidas
+              </CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-5 md:p-6 pt-0 md:pt-0">
+            <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Link href="/dashboard/checkin" className="group">
-                <div className="p-5 md:p-6 rounded-2xl bg-slate-50 border border-slate-100 hover:border-primary/30 hover:bg-primary/5 transition-all h-full">
-                  <div className="bg-white w-10 h-10 md:w-12 md:h-12 rounded-xl shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <CheckCircle2 className="text-primary w-5 h-5 md:w-6 h-6" />
+                <div className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 hover:border-slate-300 hover:bg-white transition-all flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-lg bg-white border border-slate-100 shadow-sm flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                    <CheckCircle2 className="text-slate-900 w-5 h-5" />
                   </div>
-                  <h3 className="font-bold text-slate-900 text-sm md:text-base">Iniciar Check-in</h3>
-                  <p className="text-xs md:text-sm text-slate-500 mt-1">Validar entradas via QR Code ou busca manual.</p>
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-900">Check-in</h4>
+                    <p className="text-[11px] text-slate-500">Validar entradas via QR Code</p>
+                  </div>
                 </div>
               </Link>
               <Link href="/dashboard/tables" className="group">
-                <div className="p-5 md:p-6 rounded-2xl bg-slate-50 border border-slate-100 hover:border-primary/30 hover:bg-primary/5 transition-all h-full">
-                  <div className="bg-white w-10 h-10 md:w-12 md:h-12 rounded-xl shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <MapPin className="text-primary w-5 h-5 md:w-6 h-6" />
+                <div className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 hover:border-slate-300 hover:bg-white transition-all flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-lg bg-white border border-slate-100 shadow-sm flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                    <MapPin className="text-slate-900 w-5 h-5" />
                   </div>
-                  <h3 className="font-bold text-slate-900 text-sm md:text-base">Mapa de Mesas</h3>
-                  <p className="text-xs md:text-sm text-slate-500 mt-1">Visualizar ocupação e gerenciar assentos.</p>
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-900">Mapa de Mesas</h4>
+                    <p className="text-[11px] text-slate-500">Gerenciar assentos e ocupação</p>
+                  </div>
                 </div>
               </Link>
             </CardContent>
           </Card>
 
-          <Card className="border-none shadow-sm bg-white rounded-3xl">
-            <CardHeader className="p-5 md:p-6">
-              <CardTitle className="text-lg md:text-xl font-black">Informações do Evento</CardTitle>
+          <Card className="border-slate-200 shadow-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-bold">Detalhes do Evento</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4 p-5 md:p-6 pt-0 md:pt-0">
-              <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50">
-                <div className="bg-white p-3 rounded-xl shadow-sm shrink-0">
-                  <MapPin className="text-slate-400 w-5 h-5" />
+            <CardContent className="p-0">
+              <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <MapPin className="w-4 h-4 text-slate-400" />
+                  <span className="text-sm font-medium text-slate-600">Localização</span>
                 </div>
-                <div className="min-w-0">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Local</p>
-                  <p className="font-bold text-slate-700 text-sm md:text-base truncate">{eventSettings.location || 'Não informado'}</p>
-                </div>
+                <span className="text-sm font-bold text-slate-900">{eventSettings.location || 'Não definido'}</span>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 rounded-2xl bg-slate-50">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total de Mesas</p>
-                  <p className="text-xl md:text-2xl font-black text-slate-700">{eventSettings.totalTables}</p>
+              <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Grid3X3 className="w-4 h-4 text-slate-400" />
+                  <span className="text-sm font-medium text-slate-600">Configuração de Mesas</span>
                 </div>
-                <div className="p-4 rounded-2xl bg-slate-50">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Capacidade/Mesa</p>
-                  <p className="text-xl md:text-2xl font-black text-slate-700">{eventSettings.capacityPerTable}</p>
-                </div>
+                <span className="text-sm font-bold text-slate-900">{eventSettings.totalTables} mesas ({eventSettings.capacityPerTable} lug/cada)</span>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        <Card className="border-none shadow-sm bg-white rounded-3xl">
-          <CardHeader className="flex flex-row items-center justify-between p-5 md:p-6">
-            <CardTitle className="text-lg md:text-xl font-black">Atividade Recente</CardTitle>
-            <Clock className="w-5 h-5 text-slate-300" />
+        <Card className="border-slate-200 shadow-sm">
+          <CardHeader className="pb-3 flex flex-row items-center justify-between">
+            <CardTitle className="text-base font-bold">Atividade Recente</CardTitle>
+            <Clock className="w-4 h-4 text-slate-300" />
           </CardHeader>
-          <CardContent className="p-5 md:p-6 pt-0 md:pt-0">
-            <div className="space-y-6">
+          <CardContent>
+            <div className="space-y-5">
               {recentCheckins.length === 0 ? (
-                <div className="py-12 text-center space-y-3">
-                  <div className="bg-slate-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto">
-                    <Clock className="text-slate-300 w-6 h-6" />
-                  </div>
-                  <p className="text-sm text-slate-400 font-medium">Nenhuma atividade ainda.</p>
+                <div className="py-10 text-center">
+                  <p className="text-xs text-slate-400 font-medium">Nenhuma atividade registrada.</p>
                 </div>
               ) : (
                 recentCheckins.map((p, i) => (
-                  <div key={p.id} className="flex gap-4 relative">
+                  <div key={p.id} className="flex gap-3 relative">
                     {i !== recentCheckins.length - 1 && (
-                      <div className="absolute left-[19px] top-10 bottom-[-24px] w-0.5 bg-slate-100" />
+                      <div className="absolute left-[15px] top-8 bottom-[-20px] w-px bg-slate-100" />
                     )}
-                    <div className="z-10 bg-emerald-500 w-10 h-10 rounded-full flex items-center justify-center shrink-0 shadow-lg shadow-emerald-200">
-                      <CheckCircle2 className="text-white w-5 h-5" />
+                    <div className="z-10 bg-emerald-50 border border-emerald-100 w-8 h-8 rounded-full flex items-center justify-center shrink-0">
+                      <CheckCircle2 className="text-emerald-600 w-4 h-4" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-slate-900 truncate text-sm md:text-base">{p.name}</p>
-                      <p className="text-[10px] md:text-xs text-slate-500 flex items-center gap-1 mt-0.5">
-                        <Clock className="w-3 h-3" />
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-slate-900 truncate">{p.name}</p>
+                      <p className="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5">
                         {format(new Date(p.checkinTime!), 'HH:mm')} • Mesa {p.table}
                       </p>
                     </div>
@@ -195,10 +191,10 @@ export default function DashboardHome() {
               )}
             </div>
             {recentCheckins.length > 0 && (
-              <Button variant="ghost" className="w-full mt-8 text-primary font-bold gap-2 group text-sm" asChild>
-                <Link href="/dashboard/reports">
-                  Ver Relatório Completo
-                  <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              <Button variant="link" className="w-full mt-6 text-xs font-bold text-slate-500 hover:text-slate-900 p-0 h-auto" asChild>
+                <Link href="/dashboard/reports" className="flex items-center justify-center gap-1">
+                  Ver relatório completo
+                  <ArrowUpRight className="w-3 h-3" />
                 </Link>
               </Button>
             )}
