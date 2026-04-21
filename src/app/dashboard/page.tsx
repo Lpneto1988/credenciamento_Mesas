@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, Check, UserCheck, AlertCircle, Clock, ArrowRight, Printer, X } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Search, Check, UserCheck, AlertCircle, Clock, ArrowRight, Printer, X, Users } from "lucide-react";
 import { Participant } from "@/types";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -16,6 +17,10 @@ export default function CheckinPage() {
   const [search, setSearch] = useState("");
   const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+
+  const total = participants.length;
+  const present = participants.filter(p => p.status === 'presente').length;
+  const progress = total > 0 ? (present / total) * 100 : 0;
 
   const filteredParticipants = useMemo(() => {
     if (search.length < 3) return [];
@@ -127,7 +132,22 @@ export default function CheckinPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-10">
+    <div className="max-w-3xl mx-auto space-y-8">
+      {/* Progress Header */}
+      <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-slate-500 font-bold text-sm uppercase tracking-wider">
+            <Users className="w-4 h-4" />
+            Progresso do Evento
+          </div>
+          <div className="text-right">
+            <span className="text-2xl font-black text-primary">{present}</span>
+            <span className="text-slate-300 font-bold text-lg"> / {total}</span>
+          </div>
+        </div>
+        <Progress value={progress} className="h-3 bg-slate-100" />
+      </div>
+
       <div className="text-center space-y-3">
         <h1 className="text-4xl font-black tracking-tight text-slate-900">Check-in</h1>
         <p className="text-slate-500 text-lg">Localize o participante para liberar a entrada</p>
