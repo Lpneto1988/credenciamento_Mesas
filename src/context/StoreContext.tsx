@@ -14,6 +14,8 @@ interface StoreContextType {
   addParticipant: (p: Omit<Participant, 'id' | 'status'>) => void;
   updateParticipant: (id: string, p: Partial<Participant>) => void;
   deleteParticipant: (id: string) => void;
+  bulkDeleteParticipants: (ids: string[]) => void;
+  bulkCheckinParticipants: (ids: string[]) => void;
   performCheckin: (participantId: string) => void;
   addCategory: (c: Omit<Category, 'id'>) => string;
   deleteCategory: (id: string) => void;
@@ -90,6 +92,21 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   const deleteParticipant = (id: string) => {
     setParticipants(participants.filter(p => p.id !== id));
     toast.success("Participante removido");
+  };
+
+  const bulkDeleteParticipants = (ids: string[]) => {
+    setParticipants(participants.filter(p => !ids.includes(p.id)));
+    toast.success(`${ids.length} participantes removidos`);
+  };
+
+  const bulkCheckinParticipants = (ids: string[]) => {
+    const now = new Date().toISOString();
+    setParticipants(participants.map(p => 
+      ids.includes(p.id) && p.status === 'ausente'
+        ? { ...p, status: 'presente', checkinTime: now, operatorId: currentUser?.id }
+        : p
+    ));
+    toast.success(`Check-in realizado para ${ids.length} participantes`);
   };
 
   const performCheckin = (participantId: string) => {
@@ -178,7 +195,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <StoreContext.Provider value={{ 
       currentUser, participants, categories, eventSettings, login, logout, 
-      addParticipant, updateParticipant, deleteParticipant, 
+      addParticipant, updateParticipant, deleteParticipant, bulkDeleteParticipants, bulkCheckinParticipants,
       performCheckin, addCategory, deleteCategory, updateSettings, importParticipants 
     }}>
       {children}

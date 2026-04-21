@@ -26,17 +26,30 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Search, Edit2, Trash2, UserPlus, X, Filter, QrCode, Download } from "lucide-react";
+import { Search, Edit2, Trash2, UserPlus, X, Filter, QrCode, Download, CheckCircle, Printer } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Participant } from "@/types";
 import { QRCodeSVG } from "qrcode.react";
+import { toast } from "sonner";
 
 export default function ParticipantsPage() {
-  const { participants, categories, addParticipant, updateParticipant, deleteParticipant } = useStore();
+  const { 
+    participants, 
+    categories, 
+    addParticipant, 
+    updateParticipant, 
+    deleteParticipant,
+    bulkDeleteParticipants,
+    bulkCheckinParticipants
+  } = useStore();
+
   const [search, setSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isQrDialogOpen, setIsQrDialogOpen] = useState(false);
   const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(null);
@@ -57,6 +70,71 @@ export default function ParticipantsPage() {
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedIds(filtered.map(p => p.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  const handleSelectOne = (id: string, checked: boolean) => {
+    if (checked) {
+      setSelectedIds([...selectedIds, id]);
+    } else {
+      setSelectedIds(selectedIds.filter(i => i !== id));
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (confirm(`Tem certeza que deseja excluir ${selectedIds.length} participantes?`)) {
+      bulkDeleteParticipants(selectedIds);
+      setSelectedIds([]);
+    }
+  };
+
+  const handleBulkCheckin = () => {
+    bulkCheckinParticipants(selectedIds);
+    setSelectedIds([]);
+  };
+
+  const handlePrintBadges = () => {
+    const selectedParticipants = participants.filter(p => selectedIds.includes(p.id));
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const badgesHtml = selectedParticipants.map(p => {
+      const category = categories.find(c => c.id === p.categoryId);
+      return `
+        <div class="badge">
+          <div class="name">${p.name}</div>
+          <div class="category">${category?.name || 'Participante'}</div>
+          <div class="table">MESA ${p.table}</div>
+        </div>
+      `;
+    }).join('');
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <style>
+            body { font-family: sans-serif; margin: 0; padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+            .badge { border: 2px solid #eee; padding: 30px; text-align: center; border-radius: 15px; page-break-inside: avoid; }
+            .name { font-size: 24px; font-weight: bold; margin-bottom: 5px; }
+            .category { font-size: 14px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; }
+            .table { font-weight: 900; font-size: 40px; background: #000; color: #fff; padding: 10px; border-radius: 8px; }
+            @media print { body { grid-template-columns: 1fr 1fr; } }
+          </style>
+        </head>
+        <body>
+          ${badgesHtml}
+          <script>window.onload = () => { window.print(); window.close(); }</script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
   const handleOpenAdd = () => {
     setEditingParticipant(null);
     setFormData({ name: '', email: '', cpf: '', categoryId: categories[0]?.id || '', table: '1' });
@@ -73,11 +151,6 @@ export default function ParticipantsPage() {
       table: p.table.toString()
     });
     setIsDialogOpen(true);
-  };
-
-  const handleOpenQr = (p: Participant) => {
-    setSelectedParticipant(p);
-    setIsQrDialogOpen(true);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -106,10 +179,29 @@ export default function ParticipantsPage() {
           <p className="text-muted-foreground">Gerencie a lista de convidados do evento</p>
         </div>
 
-        <Button onClick={handleOpenAdd} className="gap-2">
-          <UserPlus className="w-4 h-4" />
-          Novo Participante
-        </Button>
+        <div className="flex gap-2">
+          {selectedIds.length > 0 && (
+            <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-lg animate-in fade-in slide-in-from-right-4">
+              <span className="text-xs font-bold px-2">{selectedIds.length} selecionados</span>
+              <Button size="sm" variant="secondary" className="h-8 gap-1" onClick={handleBulkCheckin}>
+                <CheckCircle className="w-3.5 h-3.5" /> Check-in
+              </Button>
+              <Button size="sm" variant="secondary" className="h-8 gap-1" onClick={handlePrintBadges}>
+                <Printer className="w-3.5 h-3.5" /> Crachás
+              </Button>
+              <Button size="sm" variant="destructive" className="h-8 gap-1" onClick={handleBulkDelete}>
+                <Trash2 className="w-3.5 h-3.5" /> Excluir
+              </Button>
+              <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => setSelectedIds([])}>
+                <X className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+          )}
+          <Button onClick={handleOpenAdd} className="gap-2">
+            <UserPlus className="w-4 h-4" />
+            Novo Participante
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -160,6 +252,12 @@ export default function ParticipantsPage() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-12">
+                <Checkbox 
+                  checked={filtered.length > 0 && selectedIds.length === filtered.length}
+                  onCheckedChange={handleSelectAll}
+                />
+              </TableHead>
               <TableHead>Nome</TableHead>
               <TableHead>CPF</TableHead>
               <TableHead>Categoria</TableHead>
@@ -171,10 +269,10 @@ export default function ParticipantsPage() {
           <TableBody>
             {filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+                <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
                   <div className="flex flex-col items-center gap-2">
                     <Search className="w-8 h-8 opacity-20" />
-                    <p>Nenhum participante encontrado com os filtros atuais.</p>
+                    <p>Nenhum participante encontrado.</p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -182,7 +280,13 @@ export default function ParticipantsPage() {
               filtered.map((p) => {
                 const category = categories.find(c => c.id === p.categoryId);
                 return (
-                  <TableRow key={p.id}>
+                  <TableRow key={p.id} className={selectedIds.includes(p.id) ? "bg-slate-50" : ""}>
+                    <TableCell>
+                      <Checkbox 
+                        checked={selectedIds.includes(p.id)}
+                        onCheckedChange={(checked) => handleSelectOne(p.id, !!checked)}
+                      />
+                    </TableCell>
                     <TableCell className="font-medium">
                       <div>{p.name}</div>
                       <div className="text-xs text-muted-foreground">{p.email}</div>
@@ -207,8 +311,10 @@ export default function ParticipantsPage() {
                           variant="ghost" 
                           size="icon" 
                           className="h-8 w-8 text-primary hover:bg-primary/10"
-                          onClick={() => handleOpenQr(p)}
-                          title="Ver QR Code"
+                          onClick={() => {
+                            setSelectedParticipant(p);
+                            setIsQrDialogOpen(true);
+                          }}
                         >
                           <QrCode className="w-4 h-4" />
                         </Button>
