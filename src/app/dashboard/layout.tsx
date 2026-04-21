@@ -63,10 +63,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <Image src="/logo.png" alt="Orion" fill className="object-contain" priority />
           </div>
         </div>
-        <div className="flex items-center gap-3 p-2 rounded-xl bg-slate-50 border border-slate-100">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-xs">
-            {currentUser?.username?.charAt(0).toUpperCase() || "U"}
-          </div>
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
           <div className="min-w-0">
             <p className="text-xs font-bold text-slate-900 truncate">{currentUser?.username || "Usuário"}</p>
             <p className="text-[10px] text-slate-500 capitalize">{currentUser?.role || "Acesso"}</p>
