@@ -13,7 +13,7 @@ import {
   Menu,
   CheckCircle2,
   Settings,
-  Grid3X3,
+  Grid3x3,
   Home,
   ChevronRight
 } from "lucide-react";
@@ -26,7 +26,6 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import Image from "next/image";
-import { Badge } from "@/components/ui/badge";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { currentUser, logout } = useStore();
@@ -44,7 +43,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const navItems = [
     { name: 'Dashboard', href: '/dashboard', icon: Home, roles: ['admin', 'operator'] },
     { name: 'Check-in', href: '/dashboard/checkin', icon: CheckCircle2, roles: ['admin', 'operator'] },
-    { name: 'Mapa de Mesas', href: '/dashboard/tables', icon: Grid3X3, roles: ['admin', 'operator'] },
+    { name: 'Mapa de Mesas', href: '/dashboard/tables', icon: Grid3x3, roles: ['admin', 'operator'] },
     { name: 'Participantes', href: '/dashboard/participants', icon: Users, roles: ['admin'] },
     { name: 'Categorias', href: '/dashboard/categories', icon: Tags, roles: ['admin'] },
     { name: 'Importar Dados', href: '/dashboard/import', icon: Upload, roles: ['admin'] },
