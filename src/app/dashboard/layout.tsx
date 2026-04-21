@@ -56,13 +56,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const NavContent = () => (
     <div className="flex flex-col h-full bg-white">
       <div className="p-6 border-b border-slate-100">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="relative w-12 h-12 shrink-0">
-            <Image src="/logo.png" alt="Orion" fill className="object-contain" />
+        <div className="flex flex-col items-center text-center gap-4 mb-8">
+          <div className="relative w-28 h-28 shrink-0">
+            <Image src="/logo.png" alt="Orion" fill className="object-contain" priority />
           </div>
           <div>
-            <h1 className="text-xl font-black tracking-tighter leading-none text-slate-900">ORION</h1>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-1">Event Tech</p>
+            <h1 className="text-2xl font-black tracking-tighter leading-none text-slate-900">ORION</h1>
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.3em] mt-1">Event Technology</p>
           </div>
         </div>
         <div className="flex items-center gap-3 p-2 rounded-xl bg-slate-50 border border-slate-100">
@@ -124,17 +124,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Mobile Header */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="md:hidden flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-white z-20">
-          <div className="flex items-center gap-3">
-            <div className="relative w-8 h-8">
-              <Image src="/logo.png" alt="Orion" fill className="object-contain" />
+        <header className="md:hidden flex items-center justify-between px-4 py-4 border-b border-slate-200 bg-white z-20">
+          <div className="flex items-center gap-4">
+            <div className="relative w-20 h-20">
+              <Image src="/logo.png" alt="Orion" fill className="object-contain" priority />
             </div>
-            <h1 className="font-black tracking-tighter text-base">ORION</h1>
+            <div>
+              <h1 className="font-black tracking-tighter text-lg leading-none">ORION</h1>
+              <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Event Tech</p>
+            </div>
           </div>
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg">
-                <Menu className="w-5 h-5" />
+              <Button variant="ghost" size="icon" className="h-10 w-10 rounded-lg">
+                <Menu className="w-6 h-6" />
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="p-0 w-64 border-none">
