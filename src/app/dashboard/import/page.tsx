@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { useStore } from "@/context/StoreContext";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Upload, FileWarning, CheckCircle, AlertTriangle, FileText, Info } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 export default function ImportPage() {
   const { importParticipants } = useStore();
