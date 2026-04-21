@@ -27,9 +27,10 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Search, Edit2, Trash2, UserPlus, X, Filter } from "lucide-react";
+import { Search, Edit2, Trash2, UserPlus, X, Filter, QrCode, Download } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Participant } from "@/types";
+import { QRCodeSVG } from "qrcode.react";
 
 export default function ParticipantsPage() {
   const { participants, categories, addParticipant, updateParticipant, deleteParticipant } = useStore();
@@ -37,6 +38,8 @@ export default function ParticipantsPage() {
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isQrDialogOpen, setIsQrDialogOpen] = useState(false);
+  const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(null);
   const [editingParticipant, setEditingParticipant] = useState<Participant | null>(null);
   
   const [formData, setFormData] = useState({
@@ -70,6 +73,11 @@ export default function ParticipantsPage() {
       table: p.table.toString()
     });
     setIsDialogOpen(true);
+  };
+
+  const handleOpenQr = (p: Participant) => {
+    setSelectedParticipant(p);
+    setIsQrDialogOpen(true);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -198,6 +206,15 @@ export default function ParticipantsPage() {
                         <Button 
                           variant="ghost" 
                           size="icon" 
+                          className="h-8 w-8 text-primary hover:bg-primary/10"
+                          onClick={() => handleOpenQr(p)}
+                          title="Ver QR Code"
+                        >
+                          <QrCode className="w-4 h-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
                           className="h-8 w-8"
                           onClick={() => handleOpenEdit(p)}
                         >
@@ -222,6 +239,35 @@ export default function ParticipantsPage() {
           </TableBody>
         </Table>
       </div>
+
+      {/* QR Code Dialog */}
+      <Dialog open={isQrDialogOpen} onOpenChange={setIsQrDialogOpen}>
+        <DialogContent className="max-w-xs">
+          <DialogHeader>
+            <DialogTitle className="text-center">QR Code de Acesso</DialogTitle>
+          </DialogHeader>
+          {selectedParticipant && (
+            <div className="flex flex-col items-center space-y-6 py-6">
+              <div className="bg-white p-4 rounded-2xl shadow-inner border-2 border-slate-100">
+                <QRCodeSVG 
+                  value={selectedParticipant.id} 
+                  size={200}
+                  level="H"
+                  includeMargin={true}
+                />
+              </div>
+              <div className="text-center">
+                <p className="font-black text-xl text-slate-900">{selectedParticipant.name}</p>
+                <p className="text-sm text-muted-foreground">Mesa {selectedParticipant.table}</p>
+              </div>
+              <Button className="w-full gap-2" onClick={() => window.print()}>
+                <Download className="w-4 h-4" />
+                Imprimir QR Code
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>

@@ -1,22 +1,38 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useStore } from "@/context/StoreContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Search, Check, UserCheck, AlertCircle, Clock, ArrowRight, Printer, X, Users } from "lucide-react";
+import { 
+  Search, 
+  Check, 
+  UserCheck, 
+  AlertCircle, 
+  Clock, 
+  ArrowRight, 
+  Printer, 
+  X, 
+  Users, 
+  QrCode, 
+  Camera,
+  Maximize2
+} from "lucide-react";
 import { Participant } from "@/types";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { Html5QrcodeScanner } from "html5-qrcode";
+import { toast } from "sonner";
 
 export default function CheckinPage() {
   const { participants, categories, performCheckin } = useStore();
   const [search, setSearch] = useState("");
   const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
 
   const total = participants.length;
   const present = participants.filter(p => p.status === 'presente').length;
@@ -39,12 +55,49 @@ export default function CheckinPage() {
   }, [participants]);
 
   const handleCheckin = (p: Participant) => {
-    if (p.status === 'presente') return;
+    if (p.status === 'presente') {
+      toast.warning(`${p.name} já realizou check-in.`);
+      return;
+    }
     performCheckin(p.id);
     setSelectedParticipant(p);
     setShowSuccess(true);
     setSearch("");
+    setIsScanning(false);
   };
+
+  useEffect(() => {
+    let scanner: Html5QrcodeScanner | null = null;
+
+    if (isScanning) {
+      scanner = new Html5QrcodeScanner(
+        "reader",
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        /* verbose= */ false
+      );
+
+      scanner.render(
+        (decodedText) => {
+          const participant = participants.find(p => p.id === decodedText || p.cpf === decodedText);
+          if (participant) {
+            handleCheckin(participant);
+            scanner?.clear();
+          } else {
+            toast.error("QR Code inválido ou participante não encontrado.");
+          }
+        },
+        (error) => {
+          // Silently handle scan errors
+        }
+      );
+    }
+
+    return () => {
+      if (scanner) {
+        scanner.clear().catch(error => console.error("Failed to clear scanner", error));
+      }
+    };
+  }, [isScanning, participants]);
 
   const handlePrint = () => {
     if (!selectedParticipant) return;
@@ -150,22 +203,54 @@ export default function CheckinPage() {
 
       <div className="text-center space-y-3">
         <h1 className="text-4xl font-black tracking-tight text-slate-900">Check-in</h1>
-        <p className="text-slate-500 text-lg">Localize o participante para liberar a entrada</p>
+        <p className="text-slate-500 text-lg">Localize o participante ou use o QR Code</p>
       </div>
 
-      <div className="relative group">
-        <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-primary/10 rounded-3xl blur opacity-25 group-focus-within:opacity-100 transition duration-1000 group-focus-within:duration-200"></div>
-        <div className="relative">
-          <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 w-7 h-7" />
-          <Input 
-            className="h-20 pl-16 pr-6 text-2xl rounded-2xl shadow-xl border-none bg-white focus-visible:ring-2 focus-visible:ring-primary/20"
-            placeholder="Nome ou CPF..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            autoFocus
-          />
+      <div className="flex flex-col gap-4">
+        <div className="relative group">
+          <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-primary/10 rounded-3xl blur opacity-25 group-focus-within:opacity-100 transition duration-1000 group-focus-within:duration-200"></div>
+          <div className="relative">
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 w-7 h-7" />
+            <Input 
+              className="h-20 pl-16 pr-6 text-2xl rounded-2xl shadow-xl border-none bg-white focus-visible:ring-2 focus-visible:ring-primary/20"
+              placeholder="Nome ou CPF..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              autoFocus
+            />
+          </div>
         </div>
+
+        <Button 
+          variant={isScanning ? "destructive" : "secondary"} 
+          size="lg" 
+          className="h-16 rounded-2xl font-bold text-lg gap-3 shadow-sm"
+          onClick={() => setIsScanning(!isScanning)}
+        >
+          {isScanning ? (
+            <>
+              <X className="w-6 h-6" />
+              Cancelar Leitura
+            </>
+          ) : (
+            <>
+              <Camera className="w-6 h-6" />
+              Escanear QR Code
+            </>
+          )}
+        </Button>
       </div>
+
+      {isScanning && (
+        <Card className="overflow-hidden rounded-3xl border-2 border-primary/20 bg-slate-900">
+          <CardContent className="p-0 relative">
+            <div id="reader" className="w-full"></div>
+            <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+              <div className="w-64 h-64 border-2 border-white/50 rounded-3xl border-dashed animate-pulse" />
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="space-y-4">
         {search.length >= 3 && filteredParticipants.length === 0 && (
@@ -228,7 +313,7 @@ export default function CheckinPage() {
           );
         })}
 
-        {search.length === 0 && recentCheckins.length > 0 && (
+        {search.length === 0 && !isScanning && recentCheckins.length > 0 && (
           <div className="pt-8 space-y-4">
             <div className="flex items-center justify-between px-2">
               <h2 className="text-sm font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
