@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import { useStore } from "@/context/StoreContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,12 +13,14 @@ import {
   DialogTrigger 
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Users, UserCheck, UserX, CheckCircle2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Users, UserCheck, UserX, CheckCircle2, Search, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 export default function TablesPage() {
   const { participants, eventSettings, categories, performCheckin } = useStore();
+  const [search, setSearch] = useState("");
 
   const tables = Array.from({ length: eventSettings.totalTables }, (_, i) => i + 1);
 
@@ -26,11 +29,59 @@ export default function TablesPage() {
     toast.success(`Check-in de ${name} realizado com sucesso!`);
   };
 
+  const searchResults = useMemo(() => {
+    if (search.length < 2) return [];
+    return participants.filter(p => 
+      p.name.toLowerCase().includes(search.toLowerCase()) || 
+      p.cpf.includes(search)
+    ).slice(0, 5);
+  }, [participants, search]);
+
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-black tracking-tight text-slate-900">Mapa de Mesas</h1>
-        <p className="text-slate-500">Visualize a ocupação e realize check-ins rápidos por mesa.</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <h1 className="text-3xl font-black tracking-tight text-slate-900">Mapa de Mesas</h1>
+          <p className="text-slate-500">Visualize a ocupação e localize participantes rapidamente.</p>
+        </div>
+
+        <div className="relative w-full md:w-80 group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 group-focus-within:text-primary transition-colors" />
+          <Input 
+            placeholder="Localizar participante..." 
+            className="pl-12 h-12 rounded-2xl border-slate-200 bg-white shadow-sm focus-visible:ring-primary/20"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          
+          {search.length >= 2 && (
+            <div className="absolute top-full left-0 w-full mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
+              {searchResults.length === 0 ? (
+                <div className="p-4 text-center text-sm text-slate-400">Ninguém encontrado</div>
+              ) : (
+                searchResults.map(p => (
+                  <button 
+                    key={p.id}
+                    className="w-full p-4 text-left hover:bg-slate-50 flex items-center justify-between border-b last:border-none"
+                    onClick={() => {
+                      setSearch("");
+                      // Aqui poderíamos abrir o modal da mesa automaticamente se tivéssemos uma ref
+                      toast.info(`${p.name} está na Mesa ${p.table}`);
+                    }}
+                  >
+                    <div>
+                      <p className="font-bold text-slate-900 text-sm">{p.name}</p>
+                      <p className="text-[10px] text-slate-400 uppercase font-black">Mesa {p.table}</p>
+                    </div>
+                    <Badge variant={p.status === 'presente' ? 'default' : 'secondary'} className="text-[10px]">
+                      {p.status === 'presente' ? 'Presente' : 'Ausente'}
+                    </Badge>
+                  </button>
+                ))
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
