@@ -17,7 +17,6 @@ import {
   DialogContent, 
   DialogHeader, 
   DialogTitle, 
-  DialogTrigger,
   DialogFooter
 } from "@/components/ui/dialog";
 import { 
@@ -28,13 +27,15 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Search, Edit2, Trash2, UserPlus, X } from "lucide-react";
+import { Search, Edit2, Trash2, UserPlus, X, Filter } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Participant } from "@/types";
 
 export default function ParticipantsPage() {
   const { participants, categories, addParticipant, updateParticipant, deleteParticipant } = useStore();
   const [search, setSearch] = useState("");
+  const [filterCategory, setFilterCategory] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingParticipant, setEditingParticipant] = useState<Participant | null>(null);
   
@@ -46,10 +47,12 @@ export default function ParticipantsPage() {
     table: '1'
   });
 
-  const filtered = participants.filter(p => 
-    p.name.toLowerCase().includes(search.toLowerCase()) || 
-    p.cpf.includes(search)
-  );
+  const filtered = participants.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.cpf.includes(search);
+    const matchesCategory = filterCategory === "all" || p.categoryId === filterCategory;
+    const matchesStatus = filterStatus === "all" || p.status === filterStatus;
+    return matchesSearch && matchesCategory && matchesStatus;
+  });
 
   const handleOpenAdd = () => {
     setEditingParticipant(null);
@@ -101,22 +104,48 @@ export default function ParticipantsPage() {
         </Button>
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
-        <Input 
-          className="pl-10 pr-10"
-          placeholder="Buscar por nome ou CPF..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
-        {search && (
-          <button 
-            onClick={() => setSearch("")}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        )}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="md:col-span-2 relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <Input 
+            className="pl-10 pr-10"
+            placeholder="Buscar por nome ou CPF..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          {search && (
+            <button 
+              onClick={() => setSearch("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+
+        <Select value={filterCategory} onValueChange={setFilterCategory}>
+          <SelectTrigger>
+            <Filter className="w-4 h-4 mr-2 opacity-50" />
+            <SelectValue placeholder="Categoria" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas Categorias</SelectItem>
+            {categories.map(c => (
+              <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={filterStatus} onValueChange={setFilterStatus}>
+          <SelectTrigger>
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos Status</SelectItem>
+            <SelectItem value="presente">Presentes</SelectItem>
+            <SelectItem value="ausente">Ausentes</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
@@ -137,7 +166,7 @@ export default function ParticipantsPage() {
                 <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
                   <div className="flex flex-col items-center gap-2">
                     <Search className="w-8 h-8 opacity-20" />
-                    <p>Nenhum participante encontrado.</p>
+                    <p>Nenhum participante encontrado com os filtros atuais.</p>
                   </div>
                 </TableCell>
               </TableRow>

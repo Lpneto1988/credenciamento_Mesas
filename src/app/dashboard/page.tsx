@@ -4,9 +4,9 @@ import { useState, useMemo } from "react";
 import { useStore } from "@/context/StoreContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, Check, UserCheck, AlertCircle, Clock, ArrowRight } from "lucide-react";
+import { Search, Check, UserCheck, AlertCircle, Clock, ArrowRight, Printer, X } from "lucide-react";
 import { Participant } from "@/types";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -41,6 +41,48 @@ export default function CheckinPage() {
     setSearch("");
   };
 
+  const handlePrint = () => {
+    if (!selectedParticipant) return;
+    const category = categories.find(c => c.id === selectedParticipant.categoryId);
+    
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Etiqueta - ${selectedParticipant.name}</title>
+          <style>
+            body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+            .label { border: 2px solid black; padding: 40px; width: 400px; text-align: center; border-radius: 10px; }
+            .name { font-size: 32px; font-weight: bold; margin-bottom: 10px; }
+            .category { font-size: 18px; color: #666; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; }
+            .table-box { background: #000; color: #fff; padding: 20px; border-radius: 10px; }
+            .table-label { font-size: 14px; margin-bottom: 5px; }
+            .table-num { font-size: 72px; font-weight: 900; }
+          </style>
+        </head>
+        <body>
+          <div class="label">
+            <div class="name">${selectedParticipant.name}</div>
+            <div class="category">${category?.name || 'Participante'}</div>
+            <div class="table-box">
+              <div class="table-label">MESA</div>
+              <div class="table-num">${selectedParticipant.table}</div>
+            </div>
+          </div>
+          <script>
+            window.onload = () => {
+              window.print();
+              window.onafterprint = () => window.close();
+            }
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
   if (showSuccess && selectedParticipant) {
     return (
       <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in zoom-in duration-300">
@@ -73,8 +115,9 @@ export default function CheckinPage() {
               >
                 Próximo Check-in
               </Button>
-              <Button variant="ghost" className="text-muted-foreground">
-                Imprimir Etiqueta (Simulado)
+              <Button variant="outline" className="h-12 rounded-xl gap-2" onClick={handlePrint}>
+                <Printer className="w-5 h-5" />
+                Imprimir Etiqueta
               </Button>
             </div>
           </CardContent>
