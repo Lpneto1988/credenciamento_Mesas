@@ -14,7 +14,8 @@ import {
   Menu,
   CheckCircle2,
   Settings,
-  Grid3X3
+  Grid3X3,
+  Home
 } from "lucide-react";
 import { 
   Sheet, 
@@ -39,7 +40,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (!currentUser) return null;
 
   const navItems = [
-    { name: 'Check-in', href: '/dashboard', icon: CheckCircle2, roles: ['admin', 'operator'] },
+    { name: 'Início', href: '/dashboard', icon: Home, roles: ['admin', 'operator'] },
+    { name: 'Check-in', href: '/dashboard/checkin', icon: CheckCircle2, roles: ['admin', 'operator'] },
     { name: 'Mapa de Mesas', href: '/dashboard/tables', icon: Grid3X3, roles: ['admin', 'operator'] },
     { name: 'Participantes', href: '/dashboard/participants', icon: Users, roles: ['admin'] },
     { name: 'Categorias', href: '/dashboard/categories', icon: Tags, roles: ['admin'] },

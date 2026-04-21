@@ -1,344 +1,208 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
 import { useStore } from "@/context/StoreContext";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { 
-  Search, 
-  Check, 
-  UserCheck, 
-  AlertCircle, 
-  Clock, 
-  ArrowRight, 
-  Printer, 
-  X, 
   Users, 
-  QrCode, 
-  Camera,
-  Maximize2
+  CheckCircle2, 
+  Clock, 
+  TrendingUp, 
+  ArrowUpRight,
+  Calendar as CalendarIcon,
+  MapPin
 } from "lucide-react";
-import { Participant } from "@/types";
-import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { Html5QrcodeScanner } from "html5-qrcode";
-import { toast } from "sonner";
+import { ptBR } from "date-fns/locale";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
-export default function CheckinPage() {
-  const { participants, categories, performCheckin } = useStore();
-  const [search, setSearch] = useState("");
-  const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(null);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [isScanning, setIsScanning] = useState(false);
+export default function DashboardHome() {
+  const { participants, eventSettings } = useStore();
 
   const total = participants.length;
   const present = participants.filter(p => p.status === 'presente').length;
   const progress = total > 0 ? (present / total) * 100 : 0;
 
-  const filteredParticipants = useMemo(() => {
-    if (search.length < 3) return [];
-    const term = search.toLowerCase();
-    return participants.filter(p => 
-      p.name.toLowerCase().includes(term) || 
-      p.cpf.includes(term)
-    ).slice(0, 5);
-  }, [participants, search]);
-
-  const recentCheckins = useMemo(() => {
-    return participants
-      .filter(p => p.status === 'presente' && p.checkinTime)
-      .sort((a, b) => new Date(b.checkinTime!).getTime() - new Date(a.checkinTime!).getTime())
-      .slice(0, 3);
-  }, [participants]);
-
-  const handleCheckin = (p: Participant) => {
-    if (p.status === 'presente') {
-      toast.warning(`${p.name} já realizou check-in.`);
-      return;
-    }
-    performCheckin(p.id);
-    setSelectedParticipant(p);
-    setShowSuccess(true);
-    setSearch("");
-    setIsScanning(false);
-  };
-
-  useEffect(() => {
-    let scanner: Html5QrcodeScanner | null = null;
-
-    if (isScanning) {
-      scanner = new Html5QrcodeScanner(
-        "reader",
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        /* verbose= */ false
-      );
-
-      scanner.render(
-        (decodedText) => {
-          const participant = participants.find(p => p.id === decodedText || p.cpf === decodedText);
-          if (participant) {
-            handleCheckin(participant);
-            scanner?.clear();
-          } else {
-            toast.error("QR Code inválido ou participante não encontrado.");
-          }
-        },
-        (error) => {
-          // Silently handle scan errors
-        }
-      );
-    }
-
-    return () => {
-      if (scanner) {
-        scanner.clear().catch(error => console.error("Failed to clear scanner", error));
-      }
-    };
-  }, [isScanning, participants]);
-
-  const handlePrint = () => {
-    if (!selectedParticipant) return;
-    const category = categories.find(c => c.id === selectedParticipant.categoryId);
-    
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Etiqueta - ${selectedParticipant.name}</title>
-          <style>
-            body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-            .label { border: 2px solid black; padding: 40px; width: 400px; text-align: center; border-radius: 10px; }
-            .name { font-size: 32px; font-weight: bold; margin-bottom: 10px; }
-            .category { font-size: 18px; color: #666; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; }
-            .table-box { background: #000; color: #fff; padding: 20px; border-radius: 10px; }
-            .table-label { font-size: 14px; margin-bottom: 5px; }
-            .table-num { font-size: 72px; font-weight: 900; }
-          </style>
-        </head>
-        <body>
-          <div class="label">
-            <div class="name">${selectedParticipant.name}</div>
-            <div class="category">${category?.name || 'Participante'}</div>
-            <div class="table-box">
-              <div class="table-label">MESA</div>
-              <div class="table-num">${selectedParticipant.table}</div>
-            </div>
-          </div>
-          <script>
-            window.onload = () => {
-              window.print();
-              window.onafterprint = () => window.close();
-            }
-          </script>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
-  };
-
-  if (showSuccess && selectedParticipant) {
-    return (
-      <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in zoom-in duration-300">
-        <Card className="border-none shadow-2xl overflow-hidden rounded-3xl">
-          <div className="bg-gradient-to-br from-green-500 to-emerald-600 p-12 flex justify-center">
-            <div className="bg-white/20 backdrop-blur-md rounded-full p-6 border border-white/30">
-              <Check className="text-white w-20 h-20" />
-            </div>
-          </div>
-          <CardContent className="p-10 text-center space-y-8 bg-white">
-            <div className="space-y-2">
-              <h2 className="text-4xl font-black text-slate-900 tracking-tight">{selectedParticipant.name}</h2>
-              <p className="text-emerald-600 font-semibold text-xl">Entrada Autorizada</p>
-            </div>
-            
-            <div className="bg-slate-50 rounded-3xl p-10 border-2 border-dashed border-slate-200 relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent opacity-50" />
-              <p className="text-slate-400 uppercase tracking-[0.2em] text-xs font-black mb-4">Localização / Mesa</p>
-              <span className="text-9xl font-black text-primary tabular-nums">{selectedParticipant.table}</span>
-            </div>
-
-            <div className="flex flex-col gap-3">
-              <Button 
-                size="lg" 
-                className="w-full h-16 text-xl font-bold rounded-2xl shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform"
-                onClick={() => {
-                  setShowSuccess(false);
-                  setSelectedParticipant(null);
-                }}
-              >
-                Próximo Check-in
-              </Button>
-              <Button variant="outline" className="h-12 rounded-xl gap-2" onClick={handlePrint}>
-                <Printer className="w-5 h-5" />
-                Imprimir Etiqueta
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  const recentCheckins = participants
+    .filter(p => p.status === 'presente' && p.checkinTime)
+    .sort((a, b) => new Date(b.checkinTime!).getTime() - new Date(a.checkinTime!).getTime())
+    .slice(0, 5);
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
-      {/* Progress Header */}
-      <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-slate-500 font-bold text-sm uppercase tracking-wider">
-            <Users className="w-4 h-4" />
-            Progresso do Evento
+    <div className="space-y-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-black tracking-tight text-slate-900">Olá, Bem-vindo!</h1>
+          <p className="text-slate-500">Aqui está o resumo do seu evento em tempo real.</p>
+        </div>
+        <div className="flex items-center gap-3 bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
+          <div className="bg-primary/10 p-2 rounded-xl">
+            <CalendarIcon className="w-5 h-5 text-primary" />
           </div>
-          <div className="text-right">
-            <span className="text-2xl font-black text-primary">{present}</span>
-            <span className="text-slate-300 font-bold text-lg"> / {total}</span>
+          <div className="pr-4">
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Data do Evento</p>
+            <p className="text-sm font-bold text-slate-700">
+              {eventSettings.date ? format(new Date(eventSettings.date), "dd 'de' MMMM", { locale: ptBR }) : 'Não definida'}
+            </p>
           </div>
         </div>
-        <Progress value={progress} className="h-3 bg-slate-100" />
       </div>
 
-      <div className="text-center space-y-3">
-        <h1 className="text-4xl font-black tracking-tight text-slate-900">Check-in</h1>
-        <p className="text-slate-500 text-lg">Localize o participante ou use o QR Code</p>
-      </div>
-
-      <div className="flex flex-col gap-4">
-        <div className="relative group">
-          <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-primary/10 rounded-3xl blur opacity-25 group-focus-within:opacity-100 transition duration-1000 group-focus-within:duration-200"></div>
-          <div className="relative">
-            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 w-7 h-7" />
-            <Input 
-              className="h-20 pl-16 pr-6 text-2xl rounded-2xl shadow-xl border-none bg-white focus-visible:ring-2 focus-visible:ring-primary/20"
-              placeholder="Nome ou CPF..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              autoFocus
-            />
-          </div>
-        </div>
-
-        <Button 
-          variant={isScanning ? "destructive" : "secondary"} 
-          size="lg" 
-          className="h-16 rounded-2xl font-bold text-lg gap-3 shadow-sm"
-          onClick={() => setIsScanning(!isScanning)}
-        >
-          {isScanning ? (
-            <>
-              <X className="w-6 h-6" />
-              Cancelar Leitura
-            </>
-          ) : (
-            <>
-              <Camera className="w-6 h-6" />
-              Escanear QR Code
-            </>
-          )}
-        </Button>
-      </div>
-
-      {isScanning && (
-        <Card className="overflow-hidden rounded-3xl border-2 border-primary/20 bg-slate-900">
-          <CardContent className="p-0 relative">
-            <div id="reader" className="w-full"></div>
-            <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-              <div className="w-64 h-64 border-2 border-white/50 rounded-3xl border-dashed animate-pulse" />
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="border-none shadow-sm bg-white rounded-3xl overflow-hidden group">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-blue-50 p-3 rounded-2xl group-hover:scale-110 transition-transform">
+                <Users className="text-blue-600 w-6 h-6" />
+              </div>
+              <Badge className="bg-blue-100 text-blue-700 border-none">Total</Badge>
             </div>
+            <p className="text-4xl font-black text-slate-900">{total}</p>
+            <p className="text-sm text-slate-500 mt-1 font-medium">Participantes inscritos</p>
           </CardContent>
         </Card>
-      )}
 
-      <div className="space-y-4">
-        {search.length >= 3 && filteredParticipants.length === 0 && (
-          <Card className="bg-white/50 border-dashed border-2 rounded-2xl">
-            <CardContent className="p-12 text-center space-y-3">
-              <div className="bg-slate-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
-                <X className="text-slate-400 w-8 h-8" />
+        <Card className="border-none shadow-sm bg-white rounded-3xl overflow-hidden group">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-emerald-50 p-3 rounded-2xl group-hover:scale-110 transition-transform">
+                <CheckCircle2 className="text-emerald-600 w-6 h-6" />
               </div>
-              <p className="text-slate-500 font-medium">Nenhum participante encontrado com "{search}"</p>
+              <Badge className="bg-emerald-100 text-emerald-700 border-none">Presentes</Badge>
+            </div>
+            <p className="text-4xl font-black text-slate-900">{present}</p>
+            <p className="text-sm text-slate-500 mt-1 font-medium">Check-ins realizados</p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-none shadow-sm bg-white rounded-3xl overflow-hidden group">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-amber-50 p-3 rounded-2xl group-hover:scale-110 transition-transform">
+                <Clock className="text-amber-600 w-6 h-6" />
+              </div>
+              <Badge className="bg-amber-100 text-amber-700 border-none">Ausentes</Badge>
+            </div>
+            <p className="text-4xl font-black text-slate-900">{total - present}</p>
+            <p className="text-sm text-slate-500 mt-1 font-medium">Aguardando chegada</p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-none shadow-xl bg-primary text-primary-foreground rounded-3xl overflow-hidden">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-white/20 backdrop-blur-sm p-3 rounded-2xl">
+                <TrendingUp className="w-6 h-6" />
+              </div>
+              <span className="text-xs font-black uppercase tracking-widest opacity-70">Taxa de Ocupação</span>
+            </div>
+            <p className="text-4xl font-black">{Math.round(progress)}%</p>
+            <Progress value={progress} className="h-2 bg-white/20 mt-4" />
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-6">
+          <Card className="border-none shadow-sm bg-white rounded-3xl">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-xl font-black">Ações Rápidas</CardTitle>
+            </CardHeader>
+            <CardContent className="grid sm:grid-cols-2 gap-4">
+              <Link href="/dashboard/checkin" className="group">
+                <div className="p-6 rounded-2xl bg-slate-50 border border-slate-100 hover:border-primary/30 hover:bg-primary/5 transition-all">
+                  <div className="bg-white w-12 h-12 rounded-xl shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <CheckCircle2 className="text-primary w-6 h-6" />
+                  </div>
+                  <h3 className="font-bold text-slate-900">Iniciar Check-in</h3>
+                  <p className="text-sm text-slate-500 mt-1">Validar entradas via QR Code ou busca manual.</p>
+                </div>
+              </Link>
+              <Link href="/dashboard/tables" className="group">
+                <div className="p-6 rounded-2xl bg-slate-50 border border-slate-100 hover:border-primary/30 hover:bg-primary/5 transition-all">
+                  <div className="bg-white w-12 h-12 rounded-xl shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <MapPin className="text-primary w-6 h-6" />
+                  </div>
+                  <h3 className="font-bold text-slate-900">Mapa de Mesas</h3>
+                  <p className="text-sm text-slate-500 mt-1">Visualizar ocupação e gerenciar assentos.</p>
+                </div>
+              </Link>
             </CardContent>
           </Card>
-        )}
 
-        {filteredParticipants.map(p => {
-          const category = categories.find(c => c.id === p.categoryId);
-          const isPresent = p.status === 'presente';
+          <Card className="border-none shadow-sm bg-white rounded-3xl">
+            <CardHeader>
+              <CardTitle className="text-xl font-black">Informações do Evento</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50">
+                <div className="bg-white p-3 rounded-xl shadow-sm">
+                  <MapPin className="text-slate-400 w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-black uppercase tracking-widest text-slate-400">Local</p>
+                  <p className="font-bold text-slate-700">{eventSettings.location || 'Não informado'}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 rounded-2xl bg-slate-50">
+                  <p className="text-xs font-black uppercase tracking-widest text-slate-400">Total de Mesas</p>
+                  <p className="text-2xl font-black text-slate-700">{eventSettings.totalTables}</p>
+                </div>
+                <div className="p-4 rounded-2xl bg-slate-50">
+                  <p className="text-xs font-black uppercase tracking-widest text-slate-400">Capacidade/Mesa</p>
+                  <p className="text-2xl font-black text-slate-700">{eventSettings.capacityPerTable}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-          return (
-            <Card key={p.id} className={cn(
-              "overflow-hidden transition-all border-none shadow-sm hover:shadow-md rounded-2xl",
-              isPresent ? "opacity-60 bg-slate-50" : "bg-white"
-            )}>
-              <CardContent className="p-6 flex items-center justify-between gap-6">
-                <div className="flex-1 min-w-0 space-y-1">
-                  <div className="flex items-center gap-3">
-                    <h3 className="font-bold text-xl truncate text-slate-900">{p.name}</h3>
-                    {category && (
-                      <Badge variant="outline" className="rounded-full px-3" style={{ backgroundColor: `${category.color}15`, color: category.color, borderColor: `${category.color}30` }}>
-                        {category.name}
-                      </Badge>
+        <Card className="border-none shadow-sm bg-white rounded-3xl">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-xl font-black">Atividade Recente</CardTitle>
+            <Clock className="w-5 h-5 text-slate-300" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {recentCheckins.length === 0 ? (
+                <div className="py-12 text-center space-y-3">
+                  <div className="bg-slate-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto">
+                    <Clock className="text-slate-300 w-6 h-6" />
+                  </div>
+                  <p className="text-sm text-slate-400 font-medium">Nenhuma atividade ainda.</p>
+                </div>
+              ) : (
+                recentCheckins.map((p, i) => (
+                  <div key={p.id} className="flex gap-4 relative">
+                    {i !== recentCheckins.length - 1 && (
+                      <div className="absolute left-[19px] top-10 bottom-[-24px] w-0.5 bg-slate-100" />
                     )}
-                  </div>
-                  <div className="flex gap-6 text-sm font-medium text-slate-500">
-                    <span className="flex items-center gap-1.5">
-                      <span className="text-slate-300">CPF</span> {p.cpf}
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <span className="text-slate-300">MESA</span> <span className="text-primary font-bold">{p.table}</span>
-                    </span>
-                  </div>
-                </div>
-
-                {isPresent ? (
-                  <div className="flex items-center gap-2 text-amber-600 font-bold bg-amber-50 px-4 py-2.5 rounded-xl border border-amber-100">
-                    <AlertCircle className="w-5 h-5" />
-                    <span>Já Presente</span>
-                  </div>
-                ) : (
-                  <Button 
-                    size="lg" 
-                    className="h-14 px-8 font-bold rounded-xl shadow-lg shadow-primary/10"
-                    onClick={() => handleCheckin(p)}
-                  >
-                    <UserCheck className="w-5 h-5 mr-2" />
-                    Check-in
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-          );
-        })}
-
-        {search.length === 0 && !isScanning && recentCheckins.length > 0 && (
-          <div className="pt-8 space-y-4">
-            <div className="flex items-center justify-between px-2">
-              <h2 className="text-sm font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                <Clock className="w-4 h-4" />
-                Check-ins Recentes
-              </h2>
-            </div>
-            <div className="grid gap-3">
-              {recentCheckins.map(p => (
-                <div key={p.id} className="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center">
-                      <Check className="text-emerald-500 w-5 h-5" />
+                    <div className="z-10 bg-emerald-500 w-10 h-10 rounded-full flex items-center justify-center shrink-0 shadow-lg shadow-emerald-200">
+                      <CheckCircle2 className="text-white w-5 h-5" />
                     </div>
-                    <div>
-                      <p className="font-bold text-slate-900">{p.name}</p>
-                      <p className="text-xs text-slate-400">Mesa {p.table} • {format(new Date(p.checkinTime!), 'HH:mm')}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-slate-900 truncate">{p.name}</p>
+                      <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+                        <Clock className="w-3 h-3" />
+                        {format(new Date(p.checkinTime!), 'HH:mm')} • Mesa {p.table}
+                      </p>
                     </div>
                   </div>
-                  <ArrowRight className="text-slate-200 w-5 h-5" />
-                </div>
-              ))}
+                ))
+              )}
             </div>
-          </div>
-        )}
+            {recentCheckins.length > 0 && (
+              <Button variant="ghost" className="w-full mt-8 text-primary font-bold gap-2 group" asChild>
+                <Link href="/dashboard/reports">
+                  Ver Relatório Completo
+                  <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                </Link>
+              </Button>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

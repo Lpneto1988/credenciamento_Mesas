@@ -1,7 +1,7 @@
 "use client";
 
 import { useStore } from "@/context/StoreContext";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { 
@@ -11,19 +11,26 @@ import {
   DialogTitle, 
   DialogTrigger 
 } from "@/components/ui/dialog";
-import { Users, UserCheck, UserX, Info } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Users, UserCheck, UserX, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 export default function TablesPage() {
-  const { participants, eventSettings, categories } = useStore();
+  const { participants, eventSettings, categories, performCheckin } = useStore();
 
   const tables = Array.from({ length: eventSettings.totalTables }, (_, i) => i + 1);
+
+  const handleQuickCheckin = (id: string, name: string) => {
+    performCheckin(id);
+    toast.success(`Check-in de ${name} realizado com sucesso!`);
+  };
 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-black tracking-tight">Mapa de Mesas</h1>
-        <p className="text-muted-foreground">Visualize a ocupação e o status de cada mesa em tempo real</p>
+        <h1 className="text-3xl font-black tracking-tight text-slate-900">Mapa de Mesas</h1>
+        <p className="text-slate-500">Visualize a ocupação e realize check-ins rápidos por mesa.</p>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
@@ -31,9 +38,6 @@ export default function TablesPage() {
           const tableParticipants = participants.filter(p => p.table === tableNum);
           const presentCount = tableParticipants.filter(p => p.status === 'presente').length;
           const totalCount = tableParticipants.length;
-          const occupancyPercent = eventSettings.capacityPerTable > 0 
-            ? (totalCount / eventSettings.capacityPerTable) * 100 
-            : 0;
           
           const isFull = totalCount >= eventSettings.capacityPerTable;
           const allPresent = totalCount > 0 && presentCount === totalCount;
@@ -52,7 +56,7 @@ export default function TablesPage() {
                     </div>
                     
                     <div className="space-y-1">
-                      <p className="text-xs font-black uppercase tracking-widest text-slate-400">Ocupação</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Ocupação</p>
                       <p className="text-lg font-bold text-slate-900">
                         {totalCount} <span className="text-slate-300">/ {eventSettings.capacityPerTable}</span>
                       </p>
@@ -72,10 +76,10 @@ export default function TablesPage() {
                   </CardContent>
                 </Card>
               </DialogTrigger>
-              <DialogContent className="max-w-md">
+              <DialogContent className="max-w-md rounded-[2rem]">
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-3 text-2xl font-black">
-                    <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center text-lg">
+                    <div className="w-12 h-12 rounded-2xl bg-primary text-white flex items-center justify-center text-xl shadow-lg shadow-primary/20">
                       {tableNum}
                     </div>
                     Mesa {tableNum}
@@ -95,32 +99,49 @@ export default function TablesPage() {
                   </div>
 
                   <div className="space-y-3">
-                    <h4 className="text-sm font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                    <h4 className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2 px-1">
                       <Users className="w-4 h-4" />
                       Lista de Ocupantes
                     </h4>
-                    <div className="space-y-2 max-h-60 overflow-auto pr-2">
+                    <div className="space-y-2 max-h-80 overflow-auto pr-2 custom-scrollbar">
                       {tableParticipants.length === 0 ? (
-                        <p className="text-center py-8 text-slate-400 text-sm italic">Nenhum participante nesta mesa.</p>
+                        <div className="text-center py-12 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+                          <p className="text-slate-400 text-sm font-medium">Nenhum participante nesta mesa.</p>
+                        </div>
                       ) : (
                         tableParticipants.map(p => {
                           const category = categories.find(c => c.id === p.categoryId);
+                          const isPresent = p.status === 'presente';
                           return (
-                            <div key={p.id} className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-100 shadow-sm">
+                            <div key={p.id} className={cn(
+                              "flex items-center justify-between p-4 rounded-2xl border transition-all",
+                              isPresent 
+                                ? "bg-emerald-50/50 border-emerald-100 opacity-70" 
+                                : "bg-white border-slate-100 shadow-sm hover:border-primary/30"
+                            )}>
                               <div className="min-w-0">
                                 <p className="font-bold text-slate-900 truncate">{p.name}</p>
                                 {category && (
-                                  <span className="text-[10px] font-bold uppercase" style={{ color: category.color }}>
+                                  <span className="text-[10px] font-black uppercase tracking-wider" style={{ color: category.color }}>
                                     {category.name}
                                   </span>
                                 )}
                               </div>
-                              <Badge variant={p.status === 'presente' ? 'default' : 'secondary'} className={cn(
-                                "rounded-full",
-                                p.status === 'presente' ? "bg-emerald-500" : "bg-slate-100 text-slate-400"
-                              )}>
-                                {p.status === 'presente' ? 'OK' : '...'}
-                              </Badge>
+                              
+                              {isPresent ? (
+                                <div className="bg-emerald-500 text-white p-1.5 rounded-full">
+                                  <CheckCircle2 className="w-4 h-4" />
+                                </div>
+                              ) : (
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  className="rounded-xl font-bold text-xs h-8 hover:bg-primary hover:text-white transition-colors"
+                                  onClick={() => handleQuickCheckin(p.id, p.name)}
+                                >
+                                  Check-in
+                                </Button>
+                              )}
                             </div>
                           );
                         })
