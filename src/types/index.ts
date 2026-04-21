@@ -2,9 +2,9 @@ export type UserRole = 'admin' | 'operator';
 
 export interface User {
   id: string;
-  name: string;
-  email: string;
+  username: string;
   role: UserRole;
+  password?: string; // Opcional para o usuário logado por segurança
 }
 
 export interface Category {

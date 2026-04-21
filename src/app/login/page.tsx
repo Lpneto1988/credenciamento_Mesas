@@ -10,15 +10,18 @@ import { Label } from "@/components/ui/label";
 import Image from "next/image";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const { login } = useStore();
   const router = useRouter();
 
-  const handleLogin = (role: 'admin' | 'operator') => {
-    if (!email || !password) return;
-    login(email, role);
-    router.push("/dashboard");
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!username || !password) return;
+    const success = login(username, password);
+    if (success) {
+      router.push("/dashboard");
+    }
   };
 
   return (
@@ -35,39 +38,36 @@ export default function LoginPage() {
             />
           </div>
         </CardHeader>
-        <CardContent className="space-y-6 pb-12 px-10">
-          <div className="space-y-2">
-            <Label htmlFor="email" className="font-bold ml-1">E-mail</Label>
-            <Input 
-              id="email" 
-              type="email" 
-              placeholder="exemplo@email.com" 
-              className="h-12 rounded-2xl border-slate-200 focus-visible:ring-primary/20"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password" className="font-bold ml-1">Senha</Label>
-            <Input 
-              id="password" 
-              type="password" 
-              className="h-12 rounded-2xl border-slate-200 focus-visible:ring-primary/20"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4 pt-2">
-            <Button onClick={() => handleLogin('operator')} variant="outline" className="h-14 rounded-2xl font-bold border-2">
-              Operador
+        <CardContent className="pb-12 px-10">
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="username" className="font-bold ml-1">Usuário</Label>
+              <Input 
+                id="username" 
+                placeholder="Digite seu usuário" 
+                className="h-12 rounded-2xl border-slate-200 focus-visible:ring-primary/20"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password" className="font-bold ml-1">Senha</Label>
+              <Input 
+                id="password" 
+                type="password" 
+                placeholder="••••••••"
+                className="h-12 rounded-2xl border-slate-200 focus-visible:ring-primary/20"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            <Button type="submit" className="w-full h-14 rounded-2xl font-bold shadow-lg shadow-primary/20">
+              Entrar no Sistema
             </Button>
-            <Button onClick={() => handleLogin('admin')} className="h-14 rounded-2xl font-bold shadow-lg shadow-primary/20">
-              Administrador
-            </Button>
-          </div>
-          <p className="text-[10px] text-center text-slate-400 font-medium uppercase tracking-wider">
-            Acesso restrito a organizadores
-          </p>
+            <p className="text-[10px] text-center text-slate-400 font-medium uppercase tracking-wider">
+              Acesso restrito a organizadores
+            </p>
+          </form>
         </CardContent>
       </Card>
     </div>

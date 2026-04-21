@@ -6,11 +6,14 @@ import { toast } from 'sonner';
 
 interface StoreContextType {
   currentUser: User | null;
+  operators: User[];
   participants: Participant[];
   categories: Category[];
   eventSettings: EventSettings;
-  login: (email: string, role: UserRole) => void;
+  login: (username: string, password: string) => boolean;
   logout: () => void;
+  addOperator: (username: string, password: string) => void;
+  deleteOperator: (id: string) => void;
   addParticipant: (p: Omit<Participant, 'id' | 'status'>) => void;
   updateParticipant: (id: string, p: Partial<Participant>) => void;
   deleteParticipant: (id: string) => void;
@@ -27,6 +30,7 @@ const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [operators, setOperators] = useState<User[]>([]);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [categories, setCategories] = useState<Category[]>([
     { id: '1', name: 'VIP', color: '#ef4444' },
@@ -46,28 +50,69 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     const savedCategories = localStorage.getItem('event_categories');
     const savedUser = localStorage.getItem('event_user');
     const savedSettings = localStorage.getItem('event_settings');
+    const savedOperators = localStorage.getItem('event_operators');
 
     if (savedParticipants) setParticipants(JSON.parse(savedParticipants));
     if (savedCategories) setCategories(JSON.parse(savedCategories));
     if (savedUser) setCurrentUser(JSON.parse(savedUser));
     if (savedSettings) setEventSettings(JSON.parse(savedSettings));
+    if (savedOperators) setOperators(JSON.parse(savedOperators));
   }, []);
 
   useEffect(() => {
     localStorage.setItem('event_participants', JSON.stringify(participants));
     localStorage.setItem('event_categories', JSON.stringify(categories));
     localStorage.setItem('event_settings', JSON.stringify(eventSettings));
-  }, [participants, categories, eventSettings]);
+    localStorage.setItem('event_operators', JSON.stringify(operators));
+  }, [participants, categories, eventSettings, operators]);
 
-  const login = (email: string, role: UserRole) => {
-    const user = { id: Math.random().toString(), name: email.split('@')[0], email, role };
-    setCurrentUser(user);
-    localStorage.setItem('event_user', JSON.stringify(user));
+  const login = (username: string, password: string): boolean => {
+    // Admin fixo
+    if (username === 'Adm' && password === 'adm4321') {
+      const user: User = { id: 'admin-0', username: 'Adm', role: 'admin' };
+      setCurrentUser(user);
+      localStorage.setItem('event_user', JSON.stringify(user));
+      toast.success("Bem-vindo, Administrador");
+      return true;
+    }
+
+    // Busca nos operadores criados
+    const operator = operators.find(op => op.username === username && op.password === password);
+    if (operator) {
+      const { password: _, ...userWithoutPass } = operator;
+      setCurrentUser(userWithoutPass as User);
+      localStorage.setItem('event_user', JSON.stringify(userWithoutPass));
+      toast.success(`Bem-vindo, ${username}`);
+      return true;
+    }
+
+    toast.error("Usuário ou senha incorretos");
+    return false;
   };
 
   const logout = () => {
     setCurrentUser(null);
     localStorage.removeItem('event_user');
+  };
+
+  const addOperator = (username: string, password: string) => {
+    if (username === 'Adm' || operators.some(op => op.username === username)) {
+      toast.error("Este nome de usuário já existe");
+      return;
+    }
+    const newOp: User = {
+      id: Math.random().toString(36).substr(2, 9),
+      username,
+      password,
+      role: 'operator'
+    };
+    setOperators([...operators, newOp]);
+    toast.success("Operador criado com sucesso");
+  };
+
+  const deleteOperator = (id: string) => {
+    setOperators(operators.filter(op => op.id !== id));
+    toast.success("Operador removido");
   };
 
   const addParticipant = (p: Omit<Participant, 'id' | 'status'>) => {
@@ -194,7 +239,8 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <StoreContext.Provider value={{ 
-      currentUser, participants, categories, eventSettings, login, logout, 
+      currentUser, operators, participants, categories, eventSettings, login, logout, 
+      addOperator, deleteOperator,
       addParticipant, updateParticipant, deleteParticipant, bulkDeleteParticipants, bulkCheckinParticipants,
       performCheckin, addCategory, deleteCategory, updateSettings, importParticipants 
     }}>

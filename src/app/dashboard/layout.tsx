@@ -15,7 +15,8 @@ import {
   Settings,
   Grid3x3,
   Home,
-  ChevronRight
+  ChevronRight,
+  ShieldAlert
 } from "lucide-react";
 import { 
   Sheet, 
@@ -45,6 +46,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { name: 'Check-in', href: '/dashboard/checkin', icon: CheckCircle2, roles: ['admin', 'operator'] },
     { name: 'Mapa de Mesas', href: '/dashboard/tables', icon: Grid3x3, roles: ['admin', 'operator'] },
     { name: 'Participantes', href: '/dashboard/participants', icon: Users, roles: ['admin'] },
+    { name: 'Operadores', href: '/dashboard/operators', icon: ShieldAlert, roles: ['admin'] },
     { name: 'Categorias', href: '/dashboard/categories', icon: Tags, roles: ['admin'] },
     { name: 'Importar Dados', href: '/dashboard/import', icon: Upload, roles: ['admin'] },
     { name: 'Relatórios', href: '/dashboard/reports', icon: FileText, roles: ['admin'] },
@@ -63,10 +65,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
         <div className="flex items-center gap-3 p-2 rounded-xl bg-slate-50 border border-slate-100">
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-xs">
-            {currentUser.name.charAt(0).toUpperCase()}
+            {currentUser.username.charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-bold text-slate-900 truncate">{currentUser.name}</p>
+            <p className="text-xs font-bold text-slate-900 truncate">{currentUser.username}</p>
             <p className="text-[10px] text-slate-500 capitalize">{currentUser.role}</p>
           </div>
         </div>
