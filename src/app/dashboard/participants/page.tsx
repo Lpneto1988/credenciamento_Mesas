@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Search, Edit2, Trash2, UserPlus, X, Filter, QrCode, Download, CheckCircle, Printer, MoreHorizontal, Mail, UserCheck, UserX } from "lucide-react";
+import { Search, Edit2, Trash2, UserPlus, X, Filter, QrCode, Download, CheckCircle, Printer, MoreHorizontal, Mail, UserCheck, UserX, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Participant } from "@/types";
 import { QRCodeSVG } from "qrcode.react";
