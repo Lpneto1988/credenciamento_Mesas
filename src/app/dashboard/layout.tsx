@@ -56,13 +56,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const NavContent = () => (
     <div className="flex flex-col h-full bg-white">
       <div className="p-6 border-b border-slate-100">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="relative w-8 h-8">
+        <div className="flex items-center gap-4 mb-6">
+          <div className="relative w-12 h-12 shrink-0">
             <Image src="/logo.png" alt="Orion" fill className="object-contain" />
           </div>
           <div>
-            <h1 className="text-lg font-bold tracking-tight leading-none text-slate-900">ORION</h1>
-            <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mt-0.5">Event Technology</p>
+            <h1 className="text-xl font-black tracking-tighter leading-none text-slate-900">ORION</h1>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-1">Event Tech</p>
           </div>
         </div>
         <div className="flex items-center gap-3 p-2 rounded-xl bg-slate-50 border border-slate-100">
@@ -125,11 +125,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Mobile Header */}
       <div className="flex-1 flex flex-col min-w-0">
         <header className="md:hidden flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-white z-20">
-          <div className="flex items-center gap-2">
-            <div className="relative w-6 h-6">
+          <div className="flex items-center gap-3">
+            <div className="relative w-8 h-8">
               <Image src="/logo.png" alt="Orion" fill className="object-contain" />
             </div>
-            <h1 className="font-bold tracking-tight text-sm">ORION</h1>
+            <h1 className="font-black tracking-tighter text-base">ORION</h1>
           </div>
           <Sheet>
             <SheetTrigger asChild>
