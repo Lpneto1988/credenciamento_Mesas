@@ -201,18 +201,18 @@ export default function CheckinPage() {
         <Progress value={progress} className="h-2 sm:h-3 bg-slate-100" />
       </div>
 
-      <div className="text-center space-y-2 sm:space-y-3">
-        <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900">Check-in</h1>
-        <p className="text-slate-500 text-base sm:text-lg">Localize o participante ou use o QR Code</p>
+      <div className="text-center space-y-1 sm:space-y-2">
+        <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">Check-in</h1>
+        <p className="text-slate-500 text-sm sm:text-base">Localize o participante ou use o QR Code</p>
       </div>
 
       <div className="flex flex-col gap-4">
         <div className="relative group">
           <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-primary/10 rounded-3xl blur opacity-25 group-focus-within:opacity-100 transition duration-1000 group-focus-within:duration-200"></div>
           <div className="relative">
-            <Search className="absolute left-4 sm:left-5 top-1/2 -translate-y-1/2 text-slate-400 w-6 h-6 sm:w-7 h-7" />
+            <Search className="absolute left-4 sm:left-5 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 sm:w-6 h-6" />
             <Input 
-              className="h-16 sm:h-20 pl-12 sm:pl-16 pr-6 text-xl sm:text-2xl rounded-2xl shadow-xl border-none bg-white focus-visible:ring-2 focus-visible:ring-primary/20"
+              className="h-14 sm:h-16 pl-12 sm:pl-14 pr-6 text-lg sm:text-xl rounded-2xl shadow-xl border-none bg-white focus-visible:ring-2 focus-visible:ring-primary/20"
               placeholder="Nome ou CPF..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -224,17 +224,17 @@ export default function CheckinPage() {
         <Button 
           variant={isScanning ? "destructive" : "secondary"} 
           size="lg" 
-          className="h-14 sm:h-16 rounded-2xl font-bold text-base sm:text-lg gap-3 shadow-sm"
+          className="h-12 sm:h-14 rounded-2xl font-bold text-sm sm:text-base gap-3 shadow-sm"
           onClick={() => setIsScanning(!isScanning)}
         >
           {isScanning ? (
             <>
-              <X className="w-5 h-5 sm:w-6 h-6" />
+              <X className="w-5 h-5" />
               Cancelar Leitura
             </>
           ) : (
             <>
-              <Camera className="w-5 h-5 sm:w-6 h-6" />
+              <Camera className="w-5 h-5" />
               Escanear QR Code
             </>
           )}
