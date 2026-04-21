@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useStore } from "@/context/StoreContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
 import { 
   Table, 
   TableBody, 
@@ -256,7 +257,7 @@ export default function ParticipantsPage() {
           </div>
           <div>
             <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Presentes</p>
-            <p className="text-xl font-black text-emerald-700">{stats.present}</p>
+            <p className="text-xl font-black text-slate-900">{stats.present}</p>
           </div>
         </Card>
         <Card className="border-none shadow-sm bg-white rounded-2xl p-4 flex items-center gap-4">
@@ -265,7 +266,7 @@ export default function ParticipantsPage() {
           </div>
           <div>
             <p className="text-[10px] font-black uppercase tracking-widest text-amber-400">Ausentes</p>
-            <p className="text-xl font-black text-amber-700">{stats.absent}</p>
+            <p className="text-xl font-black text-slate-900">{stats.absent}</p>
           </div>
         </Card>
       </div>
