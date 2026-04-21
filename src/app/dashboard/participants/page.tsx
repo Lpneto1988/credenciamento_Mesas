@@ -18,7 +18,8 @@ import {
   DialogContent, 
   DialogHeader, 
   DialogTitle, 
-  DialogFooter
+  DialogFooter,
+  DialogDescription
 } from "@/components/ui/dialog";
 import { 
   Select, 
@@ -42,6 +43,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { cn } from "@/lib/utils";
 
 export default function ParticipantsPage() {
   const { 
@@ -454,6 +457,11 @@ export default function ParticipantsPage() {
         <DialogContent className="max-w-xs rounded-[2.5rem] p-8">
           <DialogHeader>
             <DialogTitle className="text-center text-xl font-black">Acesso Digital</DialogTitle>
+            <VisuallyHidden>
+              <DialogDescription>
+                Visualização do QR Code de acesso para o participante selecionado.
+              </DialogDescription>
+            </VisuallyHidden>
           </DialogHeader>
           {selectedParticipant && (
             <div className="flex flex-col items-center space-y-8 py-4">
@@ -485,6 +493,11 @@ export default function ParticipantsPage() {
             <DialogTitle className="text-2xl font-black">
               {editingParticipant ? 'Editar Participante' : 'Novo Participante'}
             </DialogTitle>
+            <VisuallyHidden>
+              <DialogDescription>
+                Formulário para cadastrar ou editar informações de um participante do evento.
+              </DialogDescription>
+            </VisuallyHidden>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-6 py-4">
             <div className="space-y-2">

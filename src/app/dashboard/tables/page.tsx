@@ -10,13 +10,15 @@ import {
   DialogContent, 
   DialogHeader, 
   DialogTitle, 
-  DialogTrigger 
+  DialogTrigger,
+  DialogDescription
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Users, UserCheck, UserX, CheckCircle2, Search, MapPin } from "lucide-react";
+import { Users, UserCheck, UserX, CheckCircle2, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 export default function TablesPage() {
   const { participants, eventSettings, categories, performCheckin } = useStore();
@@ -65,7 +67,6 @@ export default function TablesPage() {
                     className="w-full p-4 text-left hover:bg-slate-50 flex items-center justify-between border-b last:border-none"
                     onClick={() => {
                       setSearch("");
-                      // Aqui poderíamos abrir o modal da mesa automaticamente se tivéssemos uma ref
                       toast.info(`${p.name} está na Mesa ${p.table}`);
                     }}
                   >
@@ -135,6 +136,11 @@ export default function TablesPage() {
                     </div>
                     Mesa {tableNum}
                   </DialogTitle>
+                  <VisuallyHidden>
+                    <DialogDescription>
+                      Detalhes da ocupação e lista de participantes da mesa {tableNum}.
+                    </DialogDescription>
+                  </VisuallyHidden>
                 </DialogHeader>
                 
                 <div className="space-y-6 py-4">
