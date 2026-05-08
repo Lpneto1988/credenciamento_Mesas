@@ -43,19 +43,24 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   });
 
   useEffect(() => {
+    // 1. Verificar se existe um admin hardcoded salvo no localStorage
+    const savedAdmin = localStorage.getItem('orion_admin_session');
+    if (savedAdmin) {
+      setCurrentUser(JSON.parse(savedAdmin));
+    }
+
     fetchInitialData();
     
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
-        // Buscar o perfil com retry simples caso o trigger ainda esteja processando
-        let profile = null;
-        const { data, error } = await supabase
+        // Se houver sessão no Supabase, ela tem prioridade sobre o admin local
+        localStorage.removeItem('orion_admin_session');
+        
+        const { data: profile } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', session.user.id)
           .single();
-        
-        profile = data;
 
         setCurrentUser({
           id: session.user.id,
@@ -63,7 +68,10 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
           role: (profile?.role as any) || 'operator'
         });
       } else {
-        setCurrentUser(null);
+        // Só limpa o usuário se não houver um admin hardcoded no localStorage
+        if (!localStorage.getItem('orion_admin_session')) {
+          setCurrentUser(null);
+        }
       }
     });
 
@@ -112,10 +120,11 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const login = async (username: string, password: string): Promise<boolean> => {
-    // Login de Admin Hardcoded
-    if (username === 'Adm' && password === 'adm4321') {
+    // Login de Admin Hardcoded (Case-insensitive para facilitar)
+    if (username.toLowerCase() === 'adm' && password === 'adm4321') {
       const user: User = { id: 'admin-0', username: 'Adm', role: 'admin' };
       setCurrentUser(user);
+      localStorage.setItem('orion_admin_session', JSON.stringify(user));
       toast.success("Bem-vindo, Administrador");
       return true;
     }
@@ -131,12 +140,14 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
       return false;
     }
 
+    localStorage.removeItem('orion_admin_session');
     toast.success("Login realizado com sucesso");
     return true;
   };
 
   const logout = async () => {
     await supabase.auth.signOut();
+    localStorage.removeItem('orion_admin_session');
     setCurrentUser(null);
   };
 
