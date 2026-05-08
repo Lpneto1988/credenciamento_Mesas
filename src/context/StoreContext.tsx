@@ -48,8 +48,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       const [pRes, cRes, sRes, oRes] = await Promise.all([
         supabase.from('participants').select('*').order('name'),
         supabase.from('categories').select('*').order('name'),
-        supabase.from('event_settings').select('*').single(),
-        supabase.from('profiles').select('*').eq('role', 'operator')
+        supabase.from('event_settings').select('*').maybeSingle(),
+        supabase.from('profiles').select('*').eq('role', 'operator').order('username')
       ]);
 
       if (pRes.data) {
@@ -77,7 +77,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    // Check initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setCurrentUser({
@@ -89,7 +88,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       fetchData();
     });
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         setCurrentUser({
@@ -102,7 +100,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
-    // Real-time DB changes
     const channel = supabase.channel('db-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'participants' }, () => fetchData())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, () => fetchData())
@@ -190,19 +187,27 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   const addOperator = async (username: string, pass: string) => {
-    const { error } = await supabase.auth.signUp({
-      email: `${username.toLowerCase()}@orion.com`,
-      password: pass,
-      options: { data: { username, role: 'operator' } }
-    });
-    if (error) throw error;
-    toast.success(`Operador ${username} criado!`);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-user', {
+        body: { username, password: pass, role: 'operator' }
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      toast.success(`Operador ${username} criado com sucesso!`);
+      fetchData();
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao criar operador");
+      throw error;
+    }
   };
 
   const deleteOperator = async (id: string) => {
     const { error } = await supabase.from('profiles').delete().eq('id', id);
     if (error) throw error;
     toast.success("Acesso removido!");
+    fetchData();
   };
 
   const performCheckin = async (id: string) => {
