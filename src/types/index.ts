@@ -26,6 +26,7 @@ export interface Participant {
 }
 
 export interface EventSettings {
+  id?: string;
   name: string;
   date: string;
   location: string;

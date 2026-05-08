@@ -83,6 +83,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     
     if (settings.data) {
       setEventSettings({
+        id: settings.data.id,
         name: settings.data.name,
         date: settings.data.date || '',
         location: settings.data.location || '',
@@ -253,6 +254,11 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const updateSettings = async (s: EventSettings) => {
+    if (!eventSettings.id) {
+      toast.error("ID de configuração não encontrado");
+      return;
+    }
+
     const updateData = {
       name: s.name,
       date: s.date,
@@ -261,12 +267,12 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
       capacity_per_table: s.capacityPerTable
     };
 
-    const { error } = await supabase.from('event_settings').update(updateData).eq('id', (eventSettings as any).id);
+    const { error } = await supabase.from('event_settings').update(updateData).eq('id', eventSettings.id);
     if (error) {
-      toast.error("Erro ao salvar configurações");
+      toast.error("Erro ao salvar configurações: " + error.message);
       return;
     }
-    setEventSettings(s);
+    setEventSettings({ ...s, id: eventSettings.id });
     toast.success("Configurações salvas");
   };
 
