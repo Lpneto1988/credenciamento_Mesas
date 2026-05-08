@@ -30,11 +30,10 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Search, Edit2, Trash2, UserPlus, X, Filter, QrCode, Download, CheckCircle, Printer, MoreHorizontal, Mail, UserCheck, UserX, Users } from "lucide-react";
+import { Search, Edit2, Trash2, UserPlus, X, Filter, QrCode, Download, CheckCircle, Printer, MoreHorizontal, Mail } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Participant } from "@/types";
 import { QRCodeSVG } from "qrcode.react";
-import { toast } from "sonner";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -43,7 +42,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { cn } from "@/lib/utils";
 
 export default function ParticipantsPage() {
@@ -81,12 +79,6 @@ export default function ParticipantsPage() {
     const matchesStatus = filterStatus === "all" || p.status === filterStatus;
     return matchesSearch && matchesCategory && matchesStatus;
   });
-
-  const stats = {
-    total: filtered.length,
-    present: filtered.filter(p => p.status === 'presente').length,
-    absent: filtered.filter(p => p.status === 'ausente').length,
-  };
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -417,9 +409,7 @@ export default function ParticipantsPage() {
         <DialogContent className="max-w-[90vw] sm:max-w-xs rounded-2xl p-6">
           <DialogHeader>
             <DialogTitle className="text-center text-lg font-bold">Acesso Digital</DialogTitle>
-            <VisuallyHidden>
-              <DialogDescription>QR Code de acesso.</DialogDescription>
-            </VisuallyHidden>
+            <DialogDescription className="sr-only">QR Code de acesso.</DialogDescription>
           </DialogHeader>
           {selectedParticipant && (
             <div className="flex flex-col items-center space-y-6 py-2">
@@ -451,9 +441,7 @@ export default function ParticipantsPage() {
             <DialogTitle className="text-xl font-bold">
               {editingParticipant ? 'Editar Participante' : 'Novo Participante'}
             </DialogTitle>
-            <VisuallyHidden>
-              <DialogDescription>Formulário de cadastro.</DialogDescription>
-            </VisuallyHidden>
+            <DialogDescription className="sr-only">Formulário de cadastro.</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4 py-2">
             <div className="space-y-1.5">

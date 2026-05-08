@@ -18,7 +18,6 @@ import { Input } from "@/components/ui/input";
 import { Users, UserCheck, UserX, CheckCircle2, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 export default function TablesPage() {
   const { participants, eventSettings, categories, performCheckin } = useStore();
@@ -136,11 +135,9 @@ export default function TablesPage() {
                     </div>
                     Mesa {tableNum}
                   </DialogTitle>
-                  <VisuallyHidden>
-                    <DialogDescription>
-                      Detalhes da ocupação e lista de participantes da mesa {tableNum}.
-                    </DialogDescription>
-                  </VisuallyHidden>
+                  <DialogDescription className="sr-only">
+                    Detalhes da ocupação e lista de participantes da mesa {tableNum}.
+                  </DialogDescription>
                 </DialogHeader>
                 
                 <div className="space-y-6 py-4">
