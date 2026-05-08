@@ -9,6 +9,7 @@ interface StoreContextType {
   currentUser: User | null;
   participants: Participant[];
   categories: Category[];
+  operators: User[];
   eventSettings: EventSettings;
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
@@ -20,6 +21,8 @@ interface StoreContextType {
   performCheckin: (participantId: string) => Promise<void>;
   addCategory: (c: Omit<Category, 'id'>) => Promise<string | undefined>;
   deleteCategory: (id: string) => Promise<void>;
+  addOperator: (username: string, pass: string) => Promise<void>;
+  deleteOperator: (id: string) => Promise<void>;
   updateSettings: (s: EventSettings) => Promise<void>;
   importParticipants: (data: any[]) => Promise<{ success: number; errors: string[] }>;
 }
@@ -30,6 +33,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [operators, setOperators] = useState<User[]>([]);
   const [eventSettings, setEventSettings] = useState<EventSettings>({
     name: 'Carregando...',
     date: '',
@@ -46,7 +50,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
         setCurrentUser({
           id: session.user.id,
           username: session.user.email?.split('@')[0] || 'Usuário',
-          role: 'admin' // Simplificado para este exemplo
+          role: 'admin'
         });
       } else {
         setCurrentUser(null);
@@ -59,21 +63,27 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const fetchInitialData = async () => {
-    const [parts, cats, settings] = await Promise.all([
+    const [parts, cats, settings, ops] = await Promise.all([
       supabase.from('participants').select('*'),
       supabase.from('categories').select('*'),
-      supabase.from('event_settings').select('*').single()
+      supabase.from('event_settings').select('*').single(),
+      supabase.from('profiles').select('*') // Assumindo que operadores estão em profiles
     ]);
 
     if (parts.data) setParticipants(parts.data);
     if (cats.data) setCategories(cats.data);
     if (settings.data) setEventSettings(settings.data);
+    if (ops.data) {
+      setOperators(ops.data.map((o: any) => ({
+        id: o.id,
+        username: o.username || o.first_name || 'Operador',
+        role: 'operator'
+      })));
+    }
   };
 
   const login = async (username: string, password: string): Promise<boolean> => {
-    // Para este sistema, usaremos o login fixo do admin ou auth do supabase
     if (username === 'Adm' && password === 'adm4321') {
-      // Simulação de login admin para manter compatibilidade com o que você já tem
       const user: User = { id: 'admin-0', username: 'Adm', role: 'admin' };
       setCurrentUser(user);
       toast.success("Bem-vindo, Administrador");
@@ -81,7 +91,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     const { data, error } = await supabase.auth.signInWithPassword({
-      email: `${username}@orion.com`, // Exemplo de mapeamento
+      email: `${username}@orion.com`,
       password: password,
     });
 
@@ -197,6 +207,19 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     toast.success("Categoria removida");
   };
 
+  const addOperator = async (username: string, pass: string) => {
+    // Nota: Em um sistema real, você usaria supabase.auth.signUp
+    // Aqui estamos apenas simulando a adição para a UI
+    const newOp: User = { id: Math.random().toString(), username, role: 'operator' };
+    setOperators([...operators, newOp]);
+    toast.success("Operador criado (Simulação)");
+  };
+
+  const deleteOperator = async (id: string) => {
+    setOperators(operators.filter(o => o.id !== id));
+    toast.success("Operador removido");
+  };
+
   const updateSettings = async (s: EventSettings) => {
     const { error } = await supabase.from('event_settings').update(s).eq('id', (eventSettings as any).id);
     if (error) {
@@ -248,9 +271,9 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <StoreContext.Provider value={{ 
-      currentUser, participants, categories, eventSettings, login, logout, 
+      currentUser, participants, categories, operators, eventSettings, login, logout, 
       addParticipant, updateParticipant, deleteParticipant, bulkDeleteParticipants, bulkCheckinParticipants,
-      performCheckin, addCategory, deleteCategory, updateSettings, importParticipants 
+      performCheckin, addCategory, deleteCategory, addOperator, deleteOperator, updateSettings, importParticipants 
     }}>
       {children}
     </StoreContext.Provider>
