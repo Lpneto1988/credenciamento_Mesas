@@ -8,19 +8,27 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
+import { Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { login } = useStore();
   const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username || !password) return;
-    const success = login(username, password);
-    if (success) {
-      router.push("/dashboard");
+    
+    setIsLoading(true);
+    try {
+      const success = await login(username, password);
+      if (success) {
+        router.push("/dashboard");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -48,6 +56,7 @@ export default function LoginPage() {
                 className="h-12 rounded-2xl border-slate-200 focus-visible:ring-primary/20"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -59,10 +68,15 @@ export default function LoginPage() {
                 className="h-12 rounded-2xl border-slate-200 focus-visible:ring-primary/20"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoading}
               />
             </div>
-            <Button type="submit" className="w-full h-14 rounded-2xl font-bold shadow-lg shadow-primary/20">
-              Entrar no Sistema
+            <Button type="submit" className="w-full h-14 rounded-2xl font-bold shadow-lg shadow-primary/20" disabled={isLoading}>
+              {isLoading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                "Entrar no Sistema"
+              )}
             </Button>
             <p className="text-[10px] text-center text-slate-400 font-medium uppercase tracking-wider">
               Acesso restrito a organizadores
