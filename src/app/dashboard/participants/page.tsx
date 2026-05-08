@@ -180,7 +180,8 @@ export default function ParticipantsPage() {
       categoryId: p.categoryId,
       table: p.table.toString()
     });
-    setIsDialogOpen(true);
+    // Pequeno atraso para evitar conflito com o fechamento do DropdownMenu
+    setTimeout(() => setIsDialogOpen(true), 10);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -373,7 +374,8 @@ export default function ParticipantsPage() {
                             <DropdownMenuLabel className="text-[9px] font-bold uppercase tracking-widest text-slate-400 px-2 py-1">Opções</DropdownMenuLabel>
                             <DropdownMenuItem className="rounded-lg gap-2 cursor-pointer text-xs" onClick={() => {
                               setSelectedParticipant(p);
-                              setIsQrDialogOpen(true);
+                              // Pequeno atraso para evitar conflito com o fechamento do DropdownMenu
+                              setTimeout(() => setIsQrDialogOpen(true), 10);
                             }}>
                               <QrCode className="w-3.5 h-3.5" /> QR Code
                             </DropdownMenuItem>
