@@ -47,12 +47,15 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
-        // Buscar o perfil para saber o cargo (role)
-        const { data: profile } = await supabase
+        // Buscar o perfil com retry simples caso o trigger ainda esteja processando
+        let profile = null;
+        const { data, error } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', session.user.id)
           .single();
+        
+        profile = data;
 
         setCurrentUser({
           id: session.user.id,
@@ -73,7 +76,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     const [parts, cats, settings, ops] = await Promise.all([
       supabase.from('participants').select('*'),
       supabase.from('categories').select('*'),
-      supabase.from('event_settings').select('*').single(),
+      supabase.from('event_settings').select('*').maybeSingle(),
       supabase.from('profiles').select('*')
     ]);
 
@@ -109,7 +112,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const login = async (username: string, password: string): Promise<boolean> => {
-    // Login de Admin Hardcoded (Opcional, mas mantido para conveniência)
+    // Login de Admin Hardcoded
     if (username === 'Adm' && password === 'adm4321') {
       const user: User = { id: 'admin-0', username: 'Adm', role: 'admin' };
       setCurrentUser(user);
@@ -270,12 +273,10 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     toast.success("Operador criado com sucesso!");
-    fetchInitialData(); // Recarregar lista
+    fetchInitialData();
   };
 
   const deleteOperator = async (id: string) => {
-    // Nota: Deletar o usuário do Auth requer privilégios de admin (Service Role)
-    // Aqui deletamos apenas o perfil para remover da lista visual
     const { error } = await supabase.from('profiles').delete().eq('id', id);
     if (error) {
       toast.error("Erro ao remover perfil do operador");
