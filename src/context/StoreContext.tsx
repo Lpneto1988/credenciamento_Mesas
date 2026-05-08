@@ -114,11 +114,21 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = async (username: string, pass: string) => {
-    const email = username.includes('@') ? username : `${username.toLowerCase()}@orion.com`;
-    const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
+    // Normaliza o email para minúsculas para evitar erros de case-sensitivity
+    const email = username.includes('@') ? username.toLowerCase() : `${username.toLowerCase().trim()}@orion.com`;
+    
+    const { error } = await supabase.auth.signInWithPassword({ 
+      email, 
+      password: pass 
+    });
     
     if (error) {
-      toast.error("Usuário ou senha inválidos");
+      console.error("[Login Error]", error);
+      if (error.status === 400) {
+        toast.error("Usuário ou senha incorretos.");
+      } else {
+        toast.error(error.message || "Erro ao tentar entrar.");
+      }
       return false;
     }
     
@@ -189,7 +199,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const addOperator = async (username: string, pass: string) => {
     try {
       const { data, error } = await supabase.functions.invoke('create-user', {
-        body: { username, password: pass, role: 'operator' }
+        body: { username: username.trim(), password: pass, role: 'operator' }
       });
 
       if (error) throw error;
