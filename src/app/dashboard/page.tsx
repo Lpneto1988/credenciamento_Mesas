@@ -74,31 +74,28 @@ export default function DashboardHome() {
           { label: 'Inscritos', value: total, icon: Users, color: 'blue', sub: 'total' },
           { label: 'Presentes', value: present, icon: CheckCircle2, color: 'emerald', sub: `${total > 0 ? Math.round((present/total)*100) : 0}%` },
           { label: 'Ausentes', value: total - present, icon: Clock, color: 'amber', sub: 'espera' },
-          { label: 'Ocupação', value: `${Math.round(progress)}%`, icon: TrendingUp, color: 'slate', sub: 'capacidade', dark: true },
+          { label: 'Ocupação', value: `${Math.round(progress)}%`, icon: TrendingUp, color: 'indigo', sub: 'capacidade' },
         ].map((stat, i) => (
-          <Card key={i} className={cn(
-            "border-none shadow-md shadow-slate-200/30 overflow-hidden group transition-all hover:scale-[1.01]",
-            stat.dark ? "bg-slate-900 text-white" : "bg-white"
-          )}>
+          <Card key={i} className="border-none shadow-md shadow-slate-200/30 overflow-hidden group transition-all hover:scale-[1.01] bg-white">
             <CardContent className="p-3">
               <div className="flex items-center justify-between mb-2">
                 <div className={cn(
                   "p-1.5 rounded-md",
-                  stat.dark ? "bg-white/10" : `bg-${stat.color}-50`
+                  `bg-${stat.color}-50`
                 )}>
-                  <stat.icon className={cn("w-3.5 h-3.5", stat.dark ? "text-white" : `text-${stat.color}-500`)} />
+                  <stat.icon className={cn("w-3.5 h-3.5", `text-${stat.color}-500`)} />
                 </div>
                 <div className="h-0.5 w-6 rounded-full bg-slate-100 group-hover:bg-primary/20 transition-colors" />
               </div>
               <div className="space-y-0">
-                <h3 className="text-xl font-black tracking-tight">{stat.value}</h3>
-                <p className={cn("text-[8px] font-bold uppercase tracking-widest", stat.dark ? "text-slate-400" : "text-slate-400")}>
+                <h3 className="text-xl font-black tracking-tight text-slate-900">{stat.value}</h3>
+                <p className="text-[8px] font-bold uppercase tracking-widest text-slate-400">
                   {stat.label}
                 </p>
               </div>
-              <div className="mt-2 pt-2 border-t border-slate-50/10 flex items-center justify-between">
-                <span className={cn("text-[9px] font-medium", stat.dark ? "text-slate-400" : "text-slate-500")}>{stat.sub}</span>
-                {stat.dark && <Progress value={progress} className="h-0.5 w-8 bg-white/10" />}
+              <div className="mt-2 pt-2 border-t border-slate-50 flex items-center justify-between">
+                <span className="text-[9px] font-medium text-slate-500">{stat.sub}</span>
+                {stat.label === 'Ocupação' && <Progress value={progress} className="h-0.5 w-8 bg-slate-100" />}
               </div>
             </CardContent>
           </Card>
