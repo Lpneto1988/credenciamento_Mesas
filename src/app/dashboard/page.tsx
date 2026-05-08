@@ -16,7 +16,7 @@ import {
   Zap,
   ArrowRight
 } from "lucide-react";
-import { format } from "date-fns";
+import { format, parseISO, addMinutes } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,16 @@ export default function DashboardHome() {
     .sort((a, b) => new Date(b.checkinTime!).getTime() - new Date(a.checkinTime!).getTime())
     .slice(0, 5);
 
+  // Função para tratar a data sem deslocamento de fuso horário
+  const getFormattedDate = (dateString: string) => {
+    if (!dateString) return 'Data pendente';
+    // Adicionamos o deslocamento do fuso horário para garantir que a data permaneça no dia correto
+    const date = parseISO(dateString);
+    const userTimezoneOffset = date.getTimezoneOffset() * 60000;
+    const correctedDate = new Date(date.getTime() + userTimezoneOffset);
+    return format(correctedDate, "dd 'de' MMMM", { locale: ptBR });
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
       {/* Header Section */}
@@ -51,7 +61,7 @@ export default function DashboardHome() {
           <div className="flex items-center gap-2 text-slate-600 bg-white px-4 py-2 rounded-2xl border border-slate-100 shadow-sm">
             <CalendarIcon className="w-4 h-4 text-primary" />
             <span className="font-bold text-sm">
-              {eventSettings.date ? format(new Date(eventSettings.date), "dd 'de' MMMM", { locale: ptBR }) : 'Data pendente'}
+              {getFormattedDate(eventSettings.date)}
             </span>
           </div>
           <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 px-3 py-1 rounded-full font-bold animate-pulse">
