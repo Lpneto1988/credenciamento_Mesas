@@ -43,7 +43,6 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   });
 
   useEffect(() => {
-    // 1. Verificar se existe um admin hardcoded salvo no localStorage
     const savedAdmin = localStorage.getItem('orion_admin_session');
     if (savedAdmin) {
       setCurrentUser(JSON.parse(savedAdmin));
@@ -53,10 +52,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
-        // Se houver sessão no Supabase, ela tem prioridade sobre o admin local
         localStorage.removeItem('orion_admin_session');
-        
-        // Usando maybeSingle() para evitar erro 406 caso o perfil ainda não exista
         const { data: profile } = await supabase
           .from('profiles')
           .select('*')
@@ -69,7 +65,6 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
           role: (profile?.role as any) || 'operator'
         });
       } else {
-        // Só limpa o usuário se não houver um admin hardcoded no localStorage
         if (!localStorage.getItem('orion_admin_session')) {
           setCurrentUser(null);
         }
@@ -121,7 +116,6 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const login = async (username: string, password: string): Promise<boolean> => {
-    // Login de Admin Hardcoded
     if (username.toLowerCase() === 'adm' && password === 'adm4321') {
       const user: User = { id: 'admin-0', username: 'Adm', role: 'admin' };
       setCurrentUser(user);
@@ -130,7 +124,6 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
       return true;
     }
 
-    // Login via Supabase Auth
     const { data, error } = await supabase.auth.signInWithPassword({
       email: `${username.toLowerCase()}@orion.com`,
       password: password,
@@ -299,12 +292,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const updateSettings = async (s: EventSettings) => {
-    if (!eventSettings.id) {
-      toast.error("ID de configuração não encontrado");
-      return;
-    }
-
-    const updateData = {
+    const updateData: any = {
       name: s.name,
       date: s.date,
       location: s.location,
@@ -312,13 +300,33 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
       capacity_per_table: s.capacityPerTable
     };
 
-    const { error } = await supabase.from('event_settings').update(updateData).eq('id', eventSettings.id);
+    // Se já temos um ID, incluímos no upsert para garantir a atualização do registro correto
+    if (eventSettings.id) {
+      updateData.id = eventSettings.id;
+    }
+
+    const { data, error } = await supabase
+      .from('event_settings')
+      .upsert(updateData)
+      .select()
+      .single();
+
     if (error) {
       toast.error("Erro ao salvar configurações: " + error.message);
       return;
     }
-    setEventSettings({ ...s, id: eventSettings.id });
-    toast.success("Configurações salvas");
+
+    if (data) {
+      setEventSettings({
+        id: data.id,
+        name: data.name,
+        date: data.date || '',
+        location: data.location || '',
+        totalTables: data.total_tables || 20,
+        capacityPerTable: data.capacity_per_table || 10
+      });
+      toast.success("Configurações salvas com sucesso no banco de dados");
+    }
   };
 
   const importParticipants = async (data: any[]) => {
