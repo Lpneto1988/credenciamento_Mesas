@@ -1,386 +1,224 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User, Participant, Category, EventSettings } from '@/types';
-import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+interface Participant {
+  id: string;
+  name: string;
+  email: string | null;
+  cpf: string;
+  category_id: string | null;
+  table: number;
+  status: 'presente' | 'ausente';
+  checkin_time: string | null;
+  operator_id: string | null;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  color: string;
+}
+
+interface EventSettings {
+  name: string;
+  date: string;
+  location: string;
+  total_tables: number;
+  capacity_per_table: number;
+}
+
+interface Operator {
+  id: string;
+  username: string;
+  role: string;
+}
 
 interface StoreContextType {
-  currentUser: User | null;
   participants: Participant[];
   categories: Category[];
-  operators: User[];
   eventSettings: EventSettings;
-  login: (username: string, password: string) => Promise<boolean>;
-  logout: () => void;
-  addParticipant: (p: Omit<Participant, 'id' | 'status'>) => Promise<void>;
-  updateParticipant: (id: string, p: Partial<Participant>) => Promise<void>;
+  operators: Operator[];
+  isLoading: boolean;
+  addParticipant: (p: Omit<Participant, 'id' | 'status' | 'checkin_time' | 'operator_id'>) => Promise<void>;
+  updateParticipant: (id: string, updates: Partial<Participant>) => Promise<void>;
   deleteParticipant: (id: string) => Promise<void>;
-  bulkDeleteParticipants: (ids: string[]) => Promise<void>;
-  bulkCheckinParticipants: (ids: string[]) => Promise<void>;
-  performCheckin: (participantId: string) => Promise<void>;
-  addCategory: (c: Omit<Category, 'id'>) => Promise<string | undefined>;
+  addCategory: (name: string, color: string) => Promise<void>;
   deleteCategory: (id: string) => Promise<void>;
+  updateEventSettings: (settings: Partial<EventSettings>) => Promise<void>;
   addOperator: (username: string, pass: string) => Promise<void>;
   deleteOperator: (id: string) => Promise<void>;
-  updateSettings: (s: EventSettings) => Promise<void>;
-  importParticipants: (data: any[]) => Promise<{ success: number; errors: string[] }>;
+  refreshData: () => Promise<void>;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
-export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [operators, setOperators] = useState<User[]>([]);
+  const [operators, setOperators] = useState<Operator[]>([]);
   const [eventSettings, setEventSettings] = useState<EventSettings>({
-    name: 'Orion Event',
-    date: '',
-    location: '',
-    totalTables: 20,
-    capacityPerTable: 10
+    name: "Meu Evento",
+    date: new Date().toISOString().split('T')[0],
+    location: "",
+    total_tables: 20,
+    capacity_per_table: 10
   });
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchData = async () => {
+    try {
+      const [pRes, cRes, sRes, oRes] = await Promise.all([
+        supabase.from('participants').select('*').order('name'),
+        supabase.from('categories').select('*').order('name'),
+        supabase.from('event_settings').select('*').single(),
+        supabase.from('profiles').select('*').eq('role', 'operator')
+      ]);
+
+      if (pRes.data) setParticipants(pRes.data);
+      if (cRes.data) setCategories(cRes.data);
+      if (sRes.data) setEventSettings(sRes.data);
+      if (oRes.data) setOperators(oRes.data);
+    } catch (error) {
+      console.error("Erro ao carregar dados:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const savedAdmin = localStorage.getItem('orion_admin_session');
-    if (savedAdmin) {
-      setCurrentUser(JSON.parse(savedAdmin));
-    }
+    fetchData();
 
-    fetchInitialData();
-    
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
-        localStorage.removeItem('orion_admin_session');
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .maybeSingle();
-
-        setCurrentUser({
-          id: session.user.id,
-          username: profile?.username || session.user.email?.split('@')[0] || 'Usuário',
-          role: (profile?.role as any) || 'operator'
-        });
-      } else {
-        if (!localStorage.getItem('orion_admin_session')) {
-          setCurrentUser(null);
-        }
-      }
-    });
+    // Real-time subscriptions
+    const pSub = supabase.channel('schema-db-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'participants' }, () => fetchData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, () => fetchData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'event_settings' }, () => fetchData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => fetchData())
+      .subscribe();
 
     return () => {
-      authListener.subscription.unsubscribe();
+      supabase.removeChannel(pSub);
     };
   }, []);
 
-  const fetchInitialData = async () => {
-    const [parts, cats, settings, ops] = await Promise.all([
-      supabase.from('participants').select('*'),
-      supabase.from('categories').select('*'),
-      supabase.from('event_settings').select('*').maybeSingle(),
-      supabase.from('profiles').select('*')
-    ]);
-
-    if (parts.data) {
-      setParticipants(parts.data.map((p: any) => ({
-        ...p,
-        categoryId: p.category_id,
-        checkinTime: p.checkin_time,
-        operatorId: p.operator_id
-      })));
-    }
-    
-    if (cats.data) setCategories(cats.data);
-    
-    if (settings.data) {
-      setEventSettings({
-        id: settings.data.id,
-        name: settings.data.name,
-        date: settings.data.date || '',
-        location: settings.data.location || '',
-        totalTables: settings.data.total_tables || 20,
-        capacityPerTable: settings.data.capacity_per_table || 10
-      });
-    }
-
-    if (ops.data) {
-      setOperators(ops.data.map((o: any) => ({
-        id: o.id,
-        username: o.username || 'Operador',
-        role: o.role || 'operator'
-      })));
-    }
-  };
-
-  const login = async (username: string, password: string): Promise<boolean> => {
-    if (username.toLowerCase() === 'adm' && password === 'adm4321') {
-      const user: User = { id: 'admin-0', username: 'Adm', role: 'admin' };
-      setCurrentUser(user);
-      localStorage.setItem('orion_admin_session', JSON.stringify(user));
-      toast.success("Bem-vindo, Administrador");
-      return true;
-    }
-
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: `${username.toLowerCase()}@orion.com`,
-      password: password,
-    });
-
+  const addParticipant = async (p: any) => {
+    const { error } = await supabase.from('participants').insert([p]);
     if (error) {
-      toast.error("Usuário ou senha incorretos");
-      return false;
+      toast.error("Erro ao adicionar participante");
+      throw error;
     }
-
-    localStorage.removeItem('orion_admin_session');
-    toast.success("Login realizado com sucesso");
-    return true;
+    toast.success("Participante adicionado!");
   };
 
-  const logout = async () => {
-    await supabase.auth.signOut();
-    localStorage.removeItem('orion_admin_session');
-    setCurrentUser(null);
-  };
-
-  const addParticipant = async (p: Omit<Participant, 'id' | 'status'>) => {
-    const { data, error } = await supabase.from('participants').insert([{ 
-      name: p.name,
-      email: p.email,
-      cpf: p.cpf,
-      category_id: p.categoryId,
-      table: p.table,
-      status: 'ausente' 
-    }]).select();
-    
+  const updateParticipant = async (id: string, updates: any) => {
+    const { error } = await supabase.from('participants').update(updates).eq('id', id);
     if (error) {
-      toast.error("Erro ao adicionar: " + error.message);
-      return;
+      toast.error("Erro ao atualizar");
+      throw error;
     }
-    
-    const newPart = { ...data[0], categoryId: data[0].category_id };
-    setParticipants([...participants, newPart]);
-    toast.success("Participante adicionado");
-  };
-
-  const updateParticipant = async (id: string, p: Partial<Participant>) => {
-    const updateData: any = { ...p };
-    if (p.categoryId) {
-      updateData.category_id = p.categoryId;
-      delete updateData.categoryId;
-    }
-
-    const { error } = await supabase.from('participants').update(updateData).eq('id', id);
-    if (error) {
-      toast.error("Erro ao atualizar: " + error.message);
-      return;
-    }
-    setParticipants(participants.map(part => part.id === id ? { ...part, ...p } : part));
-    toast.success("Dados atualizados");
   };
 
   const deleteParticipant = async (id: string) => {
     const { error } = await supabase.from('participants').delete().eq('id', id);
     if (error) {
-      toast.error("Erro ao remover: " + error.message);
-      return;
+      toast.error("Erro ao remover");
+      throw error;
     }
-    setParticipants(participants.filter(p => p.id !== id));
-    toast.success("Participante removido");
+    toast.success("Removido com sucesso");
   };
 
-  const bulkDeleteParticipants = async (ids: string[]) => {
-    const { error } = await supabase.from('participants').delete().in('id', ids);
-    if (error) {
-      toast.error("Erro na remoção em massa");
-      return;
-    }
-    setParticipants(participants.filter(p => !ids.includes(p.id)));
-    toast.success(`${ids.length} participantes removidos`);
-  };
-
-  const bulkCheckinParticipants = async (ids: string[]) => {
-    const now = new Date().toISOString();
-    const { error } = await supabase.from('participants')
-      .update({ status: 'presente', checkin_time: now, operator_id: currentUser?.id })
-      .in('id', ids)
-      .eq('status', 'ausente');
-
-    if (error) {
-      toast.error("Erro no check-in em massa");
-      return;
-    }
-    
-    setParticipants(participants.map(p => 
-      ids.includes(p.id) && p.status === 'ausente'
-        ? { ...p, status: 'presente', checkinTime: now, operatorId: currentUser?.id }
-        : p
-    ));
-    toast.success(`Check-in realizado para ${ids.length} participantes`);
-  };
-
-  const performCheckin = async (participantId: string) => {
-    const now = new Date().toISOString();
-    const { error } = await supabase.from('participants')
-      .update({ status: 'presente', checkin_time: now, operator_id: currentUser?.id })
-      .eq('id', participantId);
-
-    if (error) {
-      toast.error("Erro no check-in");
-      return;
-    }
-
-    setParticipants(participants.map(p => 
-      p.id === participantId 
-        ? { ...p, status: 'presente', checkinTime: now, operatorId: currentUser?.id } 
-        : p
-    ));
-  };
-
-  const addCategory = async (c: Omit<Category, 'id'>) => {
-    const { data, error } = await supabase.from('categories').insert([c]).select();
+  const addCategory = async (name: string, color: string) => {
+    const { error } = await supabase.from('categories').insert([{ name, color }]);
     if (error) {
       toast.error("Erro ao criar categoria");
-      return;
+      throw error;
     }
-    setCategories([...categories, data[0]]);
-    toast.success("Categoria criada");
-    return data[0].id;
+    toast.success("Categoria criada!");
   };
 
   const deleteCategory = async (id: string) => {
     const { error } = await supabase.from('categories').delete().eq('id', id);
     if (error) {
       toast.error("Erro ao remover categoria");
-      return;
+      throw error;
     }
-    setCategories(categories.filter(c => c.id !== id));
     toast.success("Categoria removida");
   };
 
-  const addOperator = async (username: string, pass: string) => {
-    const { data, error } = await supabase.auth.signUp({
-      email: `${username.toLowerCase()}@orion.com`,
-      password: pass,
-      options: {
-        data: {
-          username: username,
-          role: 'operator'
-        }
-      }
-    });
-
+  const updateEventSettings = async (settings: any) => {
+    const { error } = await supabase.from('event_settings').update(settings).eq('id', eventSettings.id as any);
     if (error) {
-      toast.error("Erro ao criar operador: " + error.message);
-      return;
+      toast.error("Erro ao salvar configurações");
+      throw error;
     }
+    toast.success("Configurações salvas!");
+  };
 
-    toast.success("Operador criado com sucesso!");
-    fetchInitialData();
+  const addOperator = async (username: string, pass: string) => {
+    try {
+      // 1. Criar o usuário no Auth do Supabase
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: `${username.toLowerCase()}@orion.com`,
+        password: pass,
+        options: {
+          data: {
+            username: username,
+            role: 'operator'
+          }
+        }
+      });
+
+      if (authError) throw authError;
+      
+      toast.success(`Operador ${username} criado com sucesso!`);
+      await fetchData(); // Forçar atualização da lista
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao criar operador");
+      throw error;
+    }
   };
 
   const deleteOperator = async (id: string) => {
+    // Nota: No Supabase Client (anon key), não podemos deletar usuários do Auth diretamente.
+    // Mas podemos remover o perfil para que ele não apareça na lista.
     const { error } = await supabase.from('profiles').delete().eq('id', id);
     if (error) {
-      toast.error("Erro ao remover perfil do operador");
-      return;
+      toast.error("Erro ao remover acesso");
+      throw error;
     }
-    setOperators(operators.filter(o => o.id !== id));
-    toast.success("Operador removido da lista");
-  };
-
-  const updateSettings = async (s: EventSettings) => {
-    const updateData: any = {
-      name: s.name,
-      date: s.date,
-      location: s.location,
-      total_tables: s.totalTables,
-      capacity_per_table: s.capacityPerTable
-    };
-
-    // Se já temos um ID, incluímos no upsert para garantir a atualização do registro correto
-    if (eventSettings.id) {
-      updateData.id = eventSettings.id;
-    }
-
-    const { data, error } = await supabase
-      .from('event_settings')
-      .upsert(updateData)
-      .select()
-      .single();
-
-    if (error) {
-      toast.error("Erro ao salvar configurações: " + error.message);
-      return;
-    }
-
-    if (data) {
-      setEventSettings({
-        id: data.id,
-        name: data.name,
-        date: data.date || '',
-        location: data.location || '',
-        totalTables: data.total_tables || 20,
-        capacityPerTable: data.capacity_per_table || 10
-      });
-      toast.success("Configurações salvas com sucesso no banco de dados");
-    }
-  };
-
-  const importParticipants = async (data: any[]) => {
-    let success = 0;
-    const errors: string[] = [];
-    const toInsert: any[] = [];
-
-    for (const [index, row] of data.entries()) {
-      const { nome, email, cpf, categoria, mesa } = row;
-      if (!nome || !cpf || !mesa) {
-        errors.push(`Linha ${index + 1}: Campos obrigatórios ausentes`);
-        continue;
-      }
-
-      const mesaNum = parseInt(mesa);
-      let catId = categories.find(c => c.name.toLowerCase() === categoria?.trim().toLowerCase())?.id;
-      
-      toInsert.push({
-        name: nome.trim(),
-        email: email?.trim() || '',
-        cpf: cpf.trim(),
-        category_id: catId || null,
-        table: mesaNum,
-        status: 'ausente'
-      });
-    }
-
-    if (toInsert.length > 0) {
-      const { data: inserted, error } = await supabase.from('participants').insert(toInsert).select();
-      if (error) {
-        errors.push("Erro na inserção: " + error.message);
-      } else {
-        success = inserted.length;
-        const mapped = inserted.map((p: any) => ({ ...p, categoryId: p.category_id }));
-        setParticipants([...participants, ...mapped]);
-      }
-    }
-
-    return { success, errors };
+    toast.success("Acesso removido");
+    await fetchData();
   };
 
   return (
-    <StoreContext.Provider value={{ 
-      currentUser, participants, categories, operators, eventSettings, login, logout, 
-      addParticipant, updateParticipant, deleteParticipant, bulkDeleteParticipants, bulkCheckinParticipants,
-      performCheckin, addCategory, deleteCategory, addOperator, deleteOperator, updateSettings, importParticipants 
+    <StoreContext.Provider value={{
+      participants,
+      categories,
+      eventSettings,
+      operators,
+      isLoading,
+      addParticipant,
+      updateParticipant,
+      deleteParticipant,
+      addCategory,
+      deleteCategory,
+      updateEventSettings,
+      addOperator,
+      deleteOperator,
+      refreshData: fetchData
     }}>
       {children}
     </StoreContext.Provider>
   );
-};
+}
 
-export const useStore = () => {
+export function useStore() {
   const context = useContext(StoreContext);
-  if (!context) throw new Error("useStore must be used within StoreProvider");
+  if (context === undefined) {
+    throw new Error('useStore must be used within a StoreProvider');
+  }
   return context;
-};
+}
