@@ -35,7 +35,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [operators, setOperators] = useState<User[]>([]);
   const [eventSettings, setEventSettings] = useState<EventSettings>({
-    name: 'Carregando...',
+    name: 'Orion Event',
     date: '',
     location: '',
     totalTables: 20,
@@ -67,12 +67,30 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
       supabase.from('participants').select('*'),
       supabase.from('categories').select('*'),
       supabase.from('event_settings').select('*').single(),
-      supabase.from('profiles').select('*') // Assumindo que operadores estão em profiles
+      supabase.from('profiles').select('*')
     ]);
 
-    if (parts.data) setParticipants(parts.data);
+    if (parts.data) {
+      setParticipants(parts.data.map((p: any) => ({
+        ...p,
+        categoryId: p.category_id,
+        checkinTime: p.checkin_time,
+        operatorId: p.operator_id
+      })));
+    }
+    
     if (cats.data) setCategories(cats.data);
-    if (settings.data) setEventSettings(settings.data);
+    
+    if (settings.data) {
+      setEventSettings({
+        name: settings.data.name,
+        date: settings.data.date || '',
+        location: settings.data.location || '',
+        totalTables: settings.data.total_tables || 20,
+        capacityPerTable: settings.data.capacity_per_table || 10
+      });
+    }
+
     if (ops.data) {
       setOperators(ops.data.map((o: any) => ({
         id: o.id,
@@ -109,17 +127,33 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const addParticipant = async (p: Omit<Participant, 'id' | 'status'>) => {
-    const { data, error } = await supabase.from('participants').insert([{ ...p, status: 'ausente' }]).select();
+    const { data, error } = await supabase.from('participants').insert([{ 
+      name: p.name,
+      email: p.email,
+      cpf: p.cpf,
+      category_id: p.categoryId,
+      table: p.table,
+      status: 'ausente' 
+    }]).select();
+    
     if (error) {
-      toast.error("Erro ao adicionar participante: " + error.message);
+      toast.error("Erro ao adicionar: " + error.message);
       return;
     }
-    setParticipants([...participants, data[0]]);
+    
+    const newPart = { ...data[0], categoryId: data[0].category_id };
+    setParticipants([...participants, newPart]);
     toast.success("Participante adicionado");
   };
 
   const updateParticipant = async (id: string, p: Partial<Participant>) => {
-    const { error } = await supabase.from('participants').update(p).eq('id', id);
+    const updateData: any = { ...p };
+    if (p.categoryId) {
+      updateData.category_id = p.categoryId;
+      delete updateData.categoryId;
+    }
+
+    const { error } = await supabase.from('participants').update(updateData).eq('id', id);
     if (error) {
       toast.error("Erro ao atualizar: " + error.message);
       return;
@@ -162,7 +196,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     
     setParticipants(participants.map(p => 
       ids.includes(p.id) && p.status === 'ausente'
-        ? { ...p, status: 'presente', checkin_time: now, operator_id: currentUser?.id }
+        ? { ...p, status: 'presente', checkinTime: now, operatorId: currentUser?.id }
         : p
     ));
     toast.success(`Check-in realizado para ${ids.length} participantes`);
@@ -181,7 +215,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
 
     setParticipants(participants.map(p => 
       p.id === participantId 
-        ? { ...p, status: 'presente', checkin_time: now, operator_id: currentUser?.id } 
+        ? { ...p, status: 'presente', checkinTime: now, operatorId: currentUser?.id } 
         : p
     ));
   };
@@ -200,7 +234,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   const deleteCategory = async (id: string) => {
     const { error } = await supabase.from('categories').delete().eq('id', id);
     if (error) {
-      toast.error("Erro ao remover categoria (verifique se há participantes nela)");
+      toast.error("Erro ao remover categoria");
       return;
     }
     setCategories(categories.filter(c => c.id !== id));
@@ -208,8 +242,6 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const addOperator = async (username: string, pass: string) => {
-    // Nota: Em um sistema real, você usaria supabase.auth.signUp
-    // Aqui estamos apenas simulando a adição para a UI
     const newOp: User = { id: Math.random().toString(), username, role: 'operator' };
     setOperators([...operators, newOp]);
     toast.success("Operador criado (Simulação)");
@@ -221,7 +253,15 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const updateSettings = async (s: EventSettings) => {
-    const { error } = await supabase.from('event_settings').update(s).eq('id', (eventSettings as any).id);
+    const updateData = {
+      name: s.name,
+      date: s.date,
+      location: s.location,
+      total_tables: s.totalTables,
+      capacity_per_table: s.capacityPerTable
+    };
+
+    const { error } = await supabase.from('event_settings').update(updateData).eq('id', (eventSettings as any).id);
     if (error) {
       toast.error("Erro ao salvar configurações");
       return;
@@ -237,7 +277,6 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
 
     for (const [index, row] of data.entries()) {
       const { nome, email, cpf, categoria, mesa } = row;
-      
       if (!nome || !cpf || !mesa) {
         errors.push(`Linha ${index + 1}: Campos obrigatórios ausentes`);
         continue;
@@ -259,10 +298,11 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     if (toInsert.length > 0) {
       const { data: inserted, error } = await supabase.from('participants').insert(toInsert).select();
       if (error) {
-        errors.push("Erro na inserção em massa: " + error.message);
+        errors.push("Erro na inserção: " + error.message);
       } else {
         success = inserted.length;
-        setParticipants([...participants, ...inserted]);
+        const mapped = inserted.map((p: any) => ({ ...p, categoryId: p.category_id }));
+        setParticipants([...participants, ...mapped]);
       }
     }
 
