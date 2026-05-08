@@ -45,12 +45,19 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     fetchInitialData();
     
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
+        // Buscar o perfil para saber o cargo (role)
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+
         setCurrentUser({
           id: session.user.id,
-          username: session.user.email?.split('@')[0] || 'Usuário',
-          role: 'admin'
+          username: profile?.username || session.user.email?.split('@')[0] || 'Usuário',
+          role: (profile?.role as any) || 'operator'
         });
       } else {
         setCurrentUser(null);
@@ -95,13 +102,14 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     if (ops.data) {
       setOperators(ops.data.map((o: any) => ({
         id: o.id,
-        username: o.username || o.first_name || 'Operador',
-        role: 'operator'
+        username: o.username || 'Operador',
+        role: o.role || 'operator'
       })));
     }
   };
 
   const login = async (username: string, password: string): Promise<boolean> => {
+    // Login de Admin Hardcoded (Opcional, mas mantido para conveniência)
     if (username === 'Adm' && password === 'adm4321') {
       const user: User = { id: 'admin-0', username: 'Adm', role: 'admin' };
       setCurrentUser(user);
@@ -109,8 +117,9 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
       return true;
     }
 
+    // Login via Supabase Auth
     const { data, error } = await supabase.auth.signInWithPassword({
-      email: `${username}@orion.com`,
+      email: `${username.toLowerCase()}@orion.com`,
       password: password,
     });
 
@@ -119,6 +128,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
       return false;
     }
 
+    toast.success("Login realizado com sucesso");
     return true;
   };
 
@@ -243,14 +253,36 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const addOperator = async (username: string, pass: string) => {
-    const newOp: User = { id: Math.random().toString(), username, role: 'operator' };
-    setOperators([...operators, newOp]);
-    toast.success("Operador criado (Simulação)");
+    const { data, error } = await supabase.auth.signUp({
+      email: `${username.toLowerCase()}@orion.com`,
+      password: pass,
+      options: {
+        data: {
+          username: username,
+          role: 'operator'
+        }
+      }
+    });
+
+    if (error) {
+      toast.error("Erro ao criar operador: " + error.message);
+      return;
+    }
+
+    toast.success("Operador criado com sucesso!");
+    fetchInitialData(); // Recarregar lista
   };
 
   const deleteOperator = async (id: string) => {
+    // Nota: Deletar o usuário do Auth requer privilégios de admin (Service Role)
+    // Aqui deletamos apenas o perfil para remover da lista visual
+    const { error } = await supabase.from('profiles').delete().eq('id', id);
+    if (error) {
+      toast.error("Erro ao remover perfil do operador");
+      return;
+    }
     setOperators(operators.filter(o => o.id !== id));
-    toast.success("Operador removido");
+    toast.success("Operador removido da lista");
   };
 
   const updateSettings = async (s: EventSettings) => {
