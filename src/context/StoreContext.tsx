@@ -56,11 +56,12 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
         // Se houver sessão no Supabase, ela tem prioridade sobre o admin local
         localStorage.removeItem('orion_admin_session');
         
+        // Usando maybeSingle() para evitar erro 406 caso o perfil ainda não exista
         const { data: profile } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', session.user.id)
-          .single();
+          .maybeSingle();
 
         setCurrentUser({
           id: session.user.id,
@@ -120,7 +121,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const login = async (username: string, password: string): Promise<boolean> => {
-    // Login de Admin Hardcoded (Case-insensitive para facilitar)
+    // Login de Admin Hardcoded
     if (username.toLowerCase() === 'adm' && password === 'adm4321') {
       const user: User = { id: 'admin-0', username: 'Adm', role: 'admin' };
       setCurrentUser(user);
