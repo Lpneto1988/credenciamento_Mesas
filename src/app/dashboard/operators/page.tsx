@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useStore } from "@/context/StoreContext";
+import { AdminGuard } from "@/components/admin-guard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,6 +30,7 @@ export default function OperatorsPage() {
   };
 
   return (
+    <AdminGuard>
     <div className="max-w-4xl mx-auto space-y-8">
       <div>
         <h1 className="text-2xl font-bold">Gestão de Operadores</h1>
@@ -51,7 +53,7 @@ export default function OperatorsPage() {
                   onChange={e => setUsername(e.target.value)}
                   disabled={isLoading}
                 />
-                <p className="text-[10px] text-slate-400">O login será: {username.toLowerCase() || '...' }@orion.com</p>
+                <p className="text-[10px] text-slate-400">Apenas nome de usuário, sem necessidade de email</p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="op-pass">Senha</Label>
@@ -92,7 +94,7 @@ export default function OperatorsPage() {
                         <Shield className="w-5 h-5" />
                       </div>
                       <div>
-                        <span className="font-bold block">{op.username}</span>
+                        <span className="font-bold block">{op.nome}</span>
                         <span className="text-[10px] text-slate-400 flex items-center gap-1">
                           <Key className="w-3 h-3" /> Acesso Ativo
                         </span>
@@ -103,7 +105,7 @@ export default function OperatorsPage() {
                       size="icon" 
                       className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                       onClick={() => {
-                        if(confirm(`Remover acesso de ${op.username}?`)) deleteOperator(op.id);
+                        if(confirm(`Remover acesso de ${op.nome}?`)) deleteOperator(op.id);
                       }}
                     >
                       <Trash2 className="w-4 h-4" />
@@ -116,5 +118,6 @@ export default function OperatorsPage() {
         </div>
       </div>
     </div>
+    </AdminGuard>
   );
 }

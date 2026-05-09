@@ -8,37 +8,45 @@ const corsHeaders = {
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
-
     const { username, password, role } = await req.json()
 
-    console.log(`[create-user] Criando usuário: ${username} com role: ${role}`);
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
 
     const { data, error } = await supabaseAdmin.auth.admin.createUser({
-      email: `${username.toLowerCase()}@orion.com`,
-      password: password,
-      email_confirm: true,
-      user_metadata: { username, role }
+      email: `${username.toLowerCase().trim()}@sistema.com`,
+      password,
+      user_metadata: { nome: username, role }
     })
 
-    if (error) throw error
+    if (error) {
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
 
-    return new Response(JSON.stringify(data), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    return new Response(JSON.stringify({ user: data.user }), {
       status: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
+
   } catch (error) {
-    console.error(`[create-user] Erro: ${error.message}`);
     return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
   }
 })

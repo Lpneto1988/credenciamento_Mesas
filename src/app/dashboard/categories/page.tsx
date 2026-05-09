@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useStore } from "@/context/StoreContext";
+import { AdminGuard } from "@/components/admin-guard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,11 +17,12 @@ export default function CategoriesPage() {
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name) return;
-    addCategory({ name, color });
+    addCategory(name, color);
     setName("");
   };
 
   return (
+    <AdminGuard>
     <div className="max-w-4xl mx-auto space-y-8">
       <div>
         <h1 className="text-2xl font-bold">Categorias</h1>
@@ -98,5 +100,6 @@ export default function CategoriesPage() {
         </div>
       </div>
     </div>
+    </AdminGuard>
   );
 }

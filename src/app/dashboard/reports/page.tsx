@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { useStore } from "@/context/StoreContext";
+import { AdminGuard } from "@/components/admin-guard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Download, Users, CheckCircle, Clock, PieChart as PieIcon, TrendingUp } from "lucide-react";
@@ -59,11 +60,11 @@ export default function ReportsPage() {
   }, [participants]);
 
   const exportCSV = () => {
-    const headers = ["Nome", "Email", "CPF", "Categoria", "Mesa", "Status", "Hora Check-in"];
+    const headers = ["Nome", "CPF", "Categoria", "Mesa", "Status", "Hora Check-in"];
     const rows = participants.map(p => {
       const category = categories.find(c => c.id === p.categoryId)?.name || '';
       const checkinTime = p.checkinTime ? format(new Date(p.checkinTime), 'dd/MM/yyyy HH:mm') : '';
-      return [p.name, p.email, p.cpf, category, p.table, p.status, checkinTime].join(',');
+      return [p.name, p.cpf, category, p.table, p.status, checkinTime].join(',');
     });
 
     const csvContent = [headers.join(','), ...rows].join('\n');
@@ -76,6 +77,7 @@ export default function ReportsPage() {
   };
 
   return (
+    <AdminGuard>
     <div className="space-y-6 md:space-y-8 pb-12">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -215,5 +217,6 @@ export default function ReportsPage() {
         </Card>
       </div>
     </div>
+    </AdminGuard>
   );
 }

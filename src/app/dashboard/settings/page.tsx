@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useStore } from "@/context/StoreContext";
+import { AdminGuard } from "@/components/admin-guard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -18,6 +19,7 @@ export default function SettingsPage() {
   };
 
   return (
+    <AdminGuard>
     <div className="max-w-2xl mx-auto space-y-8">
       <div>
         <h1 className="text-2xl font-bold">Configurações do Evento</h1>
@@ -129,5 +131,6 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
     </div>
+    </AdminGuard>
   );
 }

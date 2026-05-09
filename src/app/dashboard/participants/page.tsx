@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useStore } from "@/context/StoreContext";
+import { AdminGuard } from "@/components/admin-guard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -30,7 +31,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Search, Edit2, Trash2, UserPlus, X, Filter, QrCode, Download, CheckCircle, Printer, MoreHorizontal, Mail } from "lucide-react";
+import { Search, Edit2, Trash2, UserPlus, X, Filter, QrCode, Download, CheckCircle, Printer, MoreHorizontal } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Participant } from "@/types";
 import { QRCodeSVG } from "qrcode.react";
@@ -67,7 +68,6 @@ export default function ParticipantsPage() {
   
   const [formData, setFormData] = useState({
     name: '',
-    email: '',
     cpf: '',
     categoryId: '',
     table: '1'
@@ -167,7 +167,7 @@ export default function ParticipantsPage() {
 
   const handleOpenAdd = () => {
     setEditingParticipant(null);
-    setFormData({ name: '', email: '', cpf: '', categoryId: categories[0]?.id || '', table: '1' });
+    setFormData({ name: '', cpf: '', categoryId: categories[0]?.id || '', table: '1' });
     setIsDialogOpen(true);
   };
 
@@ -175,7 +175,6 @@ export default function ParticipantsPage() {
     setEditingParticipant(p);
     setFormData({
       name: p.name,
-      email: p.email,
       cpf: p.cpf,
       categoryId: p.categoryId,
       table: p.table.toString()
@@ -188,7 +187,6 @@ export default function ParticipantsPage() {
     e.preventDefault();
     const data = {
       name: formData.name,
-      email: formData.email,
       cpf: formData.cpf,
       categoryId: formData.categoryId,
       table: parseInt(formData.table)
@@ -203,6 +201,7 @@ export default function ParticipantsPage() {
   };
 
   return (
+    <AdminGuard>
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -329,9 +328,6 @@ export default function ParticipantsPage() {
                           </div>
                           <div className="min-w-0">
                             <div className="font-bold text-slate-900 text-sm truncate max-w-[150px] md:max-w-none">{p.name}</div>
-                            <div className="text-[10px] text-slate-400 flex items-center gap-1 truncate">
-                              <Mail className="w-2.5 h-2.5 shrink-0" /> {p.email || 'Sem e-mail'}
-                            </div>
                           </div>
                         </div>
                       </TableCell>
@@ -446,32 +442,22 @@ export default function ParticipantsPage() {
             <DialogDescription className="sr-only">Formulário de cadastro.</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4 py-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="name" className="text-xs font-bold text-slate-700 ml-0.5">Nome Completo</Label>
-              <Input 
-                id="name" 
-                required 
-                className="h-10 rounded-lg border-slate-200"
-                value={formData.name}
-                onChange={e => setFormData({...formData, name: e.target.value})}
-              />
-            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="email" className="text-xs font-bold text-slate-700 ml-0.5">E-mail</Label>
-                <Input 
-                  id="email" 
-                  type="email" 
+                <Label htmlFor="name" className="text-xs font-bold text-slate-700 ml-0.5">Nome Completo</Label>
+                <Input
+                  id="name"
+                  required
                   className="h-10 rounded-lg border-slate-200"
-                  value={formData.email}
-                  onChange={e => setFormData({...formData, email: e.target.value})}
+                  value={formData.name}
+                  onChange={e => setFormData({...formData, name: e.target.value})}
                 />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="cpf" className="text-xs font-bold text-slate-700 ml-0.5">CPF</Label>
-                <Input 
-                  id="cpf" 
-                  required 
+                <Input
+                  id="cpf"
+                  required
                   className="h-10 rounded-lg border-slate-200"
                   value={formData.cpf}
                   onChange={e => setFormData({...formData, cpf: e.target.value})}
@@ -517,5 +503,6 @@ export default function ParticipantsPage() {
         </DialogContent>
       </Dialog>
     </div>
+    </AdminGuard>
   );
 }

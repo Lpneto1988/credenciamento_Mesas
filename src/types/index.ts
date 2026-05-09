@@ -1,10 +1,12 @@
-export type UserRole = 'admin' | 'operator';
+export type UserRole = 'admin' | 'operador';
 
 export interface User {
   id: string;
-  username: string;
+  nome: string;
   role: UserRole;
-  password?: string; // Opcional para o usuário logado por segurança
+  senha?: string; // Opcional para o usuário logado por segurança
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Category {
@@ -16,7 +18,7 @@ export interface Category {
 export interface Participant {
   id: string;
   name: string;
-  email: string;
+  email?: string;
   cpf: string;
   categoryId: string;
   table: number;
@@ -32,4 +34,12 @@ export interface EventSettings {
   location: string;
   totalTables: number;
   capacityPerTable: number;
+}
+
+export interface Operator {
+  id: string;
+  nome: string;
+  role: UserRole;
+  created_at?: string;
+  updated_at?: string;
 }

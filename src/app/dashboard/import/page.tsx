@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useStore } from "@/context/StoreContext";
+import { AdminGuard } from "@/components/admin-guard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Upload, FileWarning, CheckCircle, AlertTriangle, FileText, Info } from "lucide-react";
@@ -56,6 +57,7 @@ export default function ImportPage() {
   };
 
   return (
+    <AdminGuard>
     <div className="max-w-5xl mx-auto space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -63,7 +65,7 @@ export default function ImportPage() {
           <p className="text-muted-foreground">Cadastre centenas de participantes em segundos via CSV</p>
         </div>
         <Button variant="outline" className="gap-2" onClick={() => {
-          const csvContent = "nome,email,cpf,categoria,mesa\nJoão Silva,joao@email.com,12345678901,VIP,5";
+          const csvContent = "nome,cpf,categoria,mesa\nJoão Silva,12345678901,VIP,5";
           const blob = new Blob([csvContent], { type: 'text/csv' });
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement('a');
@@ -87,14 +89,14 @@ export default function ImportPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="bg-slate-900 text-slate-50 p-4 rounded-2xl font-mono text-[10px] leading-relaxed overflow-x-auto">
-                nome, email, cpf, categoria, mesa<br/>
-                João Silva, joao@email.com, 12345678901, VIP, 5<br/>
-                Maria Souza, maria@email.com, 98765432100, Cliente, 12
+                nome, cpf, categoria, mesa<br/>
+                João Silva, 12345678901, VIP, 5<br/>
+                Maria Souza, 98765432100, Cliente, 12
               </div>
               <ul className="text-sm space-y-3 text-slate-500">
                 <li className="flex gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-                  <span>O cabeçalho deve conter exatamente: <strong>nome, email, cpf, categoria, mesa</strong>.</span>
+                  <span>O cabeçalho deve conter exatamente: <strong>nome, cpf, categoria, mesa</strong>.</span>
                 </li>
                 <li className="flex gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
@@ -205,5 +207,6 @@ export default function ImportPage() {
         </div>
       </div>
     </div>
+    </AdminGuard>
   );
 }

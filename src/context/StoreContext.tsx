@@ -17,6 +17,7 @@ interface StoreContextType {
   addParticipant: (p: any) => Promise<void>;
   updateParticipant: (id: string, updates: any) => Promise<void>;
   deleteParticipant: (id: string) => Promise<void>;
+  importParticipants: (data: any[]) => { success: number; errors: string[] };
   addCategory: (name: string, color: string) => Promise<void>;
   deleteCategory: (id: string) => Promise<void>;
   updateSettings: (settings: any) => Promise<void>;
@@ -49,7 +50,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         supabase.from('participants').select('*').order('name'),
         supabase.from('categories').select('*').order('name'),
         supabase.from('event_settings').select('*').maybeSingle(),
-        supabase.from('profiles').select('*').eq('role', 'operator').order('username')
+        supabase.from('usuarios').select('*').eq('role', 'operador').order('nome')
       ]);
 
       if (pRes.data) {
@@ -77,23 +78,37 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
+        // Buscar dados do usuário na tabela usuarios
+        const { data: userData } = await supabase
+          .from('usuarios')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+
         setCurrentUser({
           id: session.user.id,
-          username: session.user.user_metadata.username || session.user.email?.split('@')[0],
-          role: session.user.user_metadata.role || 'operator'
+          nome: userData?.nome || session.user.user_metadata.nome || session.user.email?.split('@')[0] || 'Usuário',
+          role: userData?.role || session.user.user_metadata.role || 'operador'
         });
       }
       fetchData();
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
+        // Buscar dados do usuário na tabela usuarios
+        const { data: userData } = await supabase
+          .from('usuarios')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+
         setCurrentUser({
           id: session.user.id,
-          username: session.user.user_metadata.username || session.user.email?.split('@')[0],
-          role: session.user.user_metadata.role || 'operator'
+          nome: userData?.nome || session.user.user_metadata.nome || session.user.email?.split('@')[0] || 'Usuário',
+          role: userData?.role || session.user.user_metadata.role || 'operador'
         });
       } else {
         setCurrentUser(null);
@@ -104,7 +119,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'participants' }, () => fetchData())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, () => fetchData())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'event_settings' }, () => fetchData())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => fetchData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'usuarios' }, () => fetchData())
       .subscribe();
 
     return () => {
@@ -114,8 +129,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = async (username: string, pass: string) => {
-    // Normaliza o email para minúsculas para evitar erros de case-sensitivity
-    const email = username.includes('@') ? username.toLowerCase() : `${username.toLowerCase().trim()}@orion.com`;
+    // Gera email automaticamente para o Supabase (invisível ao usuário)
+    const email = `${username.toLowerCase().trim()}@sistema.com`;
     
     const { error } = await supabase.auth.signInWithPassword({ 
       email, 
@@ -144,7 +159,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const addParticipant = async (p: any) => {
     const { error } = await supabase.from('participants').insert([{
       name: p.name,
-      email: p.email,
+      email: p.email || null,
       cpf: p.cpf,
       category_id: p.categoryId,
       table: p.table,
@@ -157,7 +172,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const updateParticipant = async (id: string, updates: any) => {
     const { error } = await supabase.from('participants').update({
       name: updates.name,
-      email: updates.email,
+      email: updates.email || null,
       cpf: updates.cpf,
       category_id: updates.categoryId,
       table: updates.table
@@ -170,6 +185,36 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const { error } = await supabase.from('participants').delete().eq('id', id);
     if (error) throw error;
     toast.success("Removido!");
+  };
+
+  const importParticipants = (data: any[]) => {
+    let success = 0;
+    const errors: string[] = [];
+
+    data.forEach((row, index) => {
+      try {
+        // Validação básica
+        if (!row.name || !row.cpf || !row.category) {
+          errors.push(`Linha ${index + 1}: Campos obrigatórios faltando (name, cpf, category)`);
+          return;
+        }
+
+        // Adicionar participante (versão síncrona para batch)
+        addParticipant({
+          name: row.name,
+          cpf: row.cpf,
+          category: row.category,
+          table: row.table || null,
+          status: row.status || 'pending'
+        });
+
+        success++;
+      } catch (error) {
+        errors.push(`Linha ${index + 1}: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+      }
+    });
+
+    return { success, errors };
   };
 
   const addCategory = async (name: string, color: string) => {
@@ -199,7 +244,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const addOperator = async (username: string, pass: string) => {
     try {
       const { data, error } = await supabase.functions.invoke('create-user', {
-        body: { username: username.trim(), password: pass, role: 'operator' }
+        body: { username: username.trim(), password: pass, role: 'operador' }
       });
 
       if (error) throw error;
@@ -214,7 +259,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   const deleteOperator = async (id: string) => {
-    const { error } = await supabase.from('profiles').delete().eq('id', id);
+    const { error } = await supabase.from('usuarios').delete().eq('id', id);
     if (error) throw error;
     toast.success("Acesso removido!");
     fetchData();
@@ -258,6 +303,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       addParticipant,
       updateParticipant,
       deleteParticipant,
+      importParticipants,
       addCategory,
       deleteCategory,
       updateSettings,

@@ -42,9 +42,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (!currentUser) return null;
 
   const navItems = [
-    { name: 'Dashboard', href: '/dashboard', icon: Home, roles: ['admin', 'operator'] },
-    { name: 'Check-in', href: '/dashboard/checkin', icon: CheckCircle2, roles: ['admin', 'operator'] },
-    { name: 'Mapa de Mesas', href: '/dashboard/tables', icon: Grid3x3, roles: ['admin', 'operator'] },
+    { name: 'Dashboard', href: '/dashboard', icon: Home, roles: ['admin', 'operador'] },
+    { name: 'Check-in', href: '/dashboard/checkin', icon: CheckCircle2, roles: ['admin', 'operador'] },
+    { name: 'Mapa de Mesas', href: '/dashboard/tables', icon: Grid3x3, roles: ['admin', 'operador'] },
     { name: 'Participantes', href: '/dashboard/participants', icon: Users, roles: ['admin'] },
     { name: 'Operadores', href: '/dashboard/operators', icon: ShieldAlert, roles: ['admin'] },
     { name: 'Categorias', href: '/dashboard/categories', icon: Tags, roles: ['admin'] },
@@ -65,7 +65,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
         <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
           <div className="min-w-0">
-            <p className="text-xs font-bold text-slate-900 truncate">{currentUser?.username || "Usuário"}</p>
+            <p className="text-xs font-bold text-slate-900 truncate">{currentUser?.nome || "Usuário"}</p>
             <p className="text-[10px] text-slate-500 capitalize">{currentUser?.role || "Acesso"}</p>
           </div>
         </div>
