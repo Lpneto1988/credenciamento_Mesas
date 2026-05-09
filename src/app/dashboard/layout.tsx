@@ -103,9 +103,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <LogOut className="w-4 h-4 mr-3" />
           Sair do Sistema
         </Button>
-        <div className="mt-4 opacity-50">
-          <MadeWithDyad />
-        </div>
       </div>
     </div>
   );
@@ -119,12 +116,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Mobile Header */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="md:hidden flex items-center justify-between px-4 py-2 border-b border-slate-200 bg-white z-20">
-          <div className="flex items-center">
-            <div className="relative w-24 h-24">
-              <Image src="/logo.png" alt="Orion" fill className="object-contain" priority />
+        <header className="md:hidden flex items-center justify-between px-4 py-2 border-b border-slate-200 bg-white z-20 sticky top-0">
+          <Link href="/dashboard" className="flex items-center">
+            <div className="relative w-20 h-12">
+              <Image src="/logo.png" alt="Orion" fill className="object-contain" />
             </div>
-          </div>
+          </Link>
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="h-10 w-10 rounded-lg">

@@ -457,7 +457,6 @@ export default function ParticipantsPage() {
                 <Label htmlFor="cpf" className="text-xs font-bold text-slate-700 ml-0.5">CPF</Label>
                 <Input
                   id="cpf"
-                  required
                   className="h-10 rounded-lg border-slate-200"
                   value={formData.cpf}
                   onChange={e => setFormData({...formData, cpf: e.target.value})}

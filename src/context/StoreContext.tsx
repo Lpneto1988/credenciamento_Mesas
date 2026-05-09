@@ -31,7 +31,14 @@ interface StoreContextType {
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(() => {
+    // Tenta carregar o usuário do sessionStorage ao iniciar
+    if (typeof window !== 'undefined') {
+      const savedUser = sessionStorage.getItem('currentUser');
+      return savedUser ? JSON.parse(savedUser) : null;
+    }
+    return null;
+  });
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [operators, setOperators] = useState<Operator[]>([]);
@@ -78,43 +85,36 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session?.user) {
-        // Buscar dados do usuário na tabela usuarios
-        const { data: userData } = await supabase
+    const initializeUser = async () => {
+      // 1. Tenta carregar o usuário do sessionStorage
+      const savedUserString = sessionStorage.getItem('currentUser');
+      if (savedUserString) {
+        const savedUser = JSON.parse(savedUserString);
+
+        // 2. Busca os dados mais recentes desse usuário no banco para garantir consistência
+        const { data: userData, error } = await supabase
           .from('usuarios')
           .select('*')
-          .eq('id', session.user.id)
+          .eq('id', savedUser.id)
           .single();
 
-        setCurrentUser({
-          id: session.user.id,
-          nome: userData?.nome || session.user.user_metadata.nome || session.user.email?.split('@')[0] || 'Usuário',
-          role: userData?.role || session.user.user_metadata.role || 'operador'
-        });
+        if (userData && !error) {
+          // 3. Atualiza o estado e o sessionStorage com os dados frescos
+          const freshUser = { id: userData.id, nome: userData.nome, role: userData.role };
+          setCurrentUser(freshUser);
+          sessionStorage.setItem('currentUser', JSON.stringify(freshUser));
+        } else {
+          // Se não encontrar o usuário no DB (ex: foi deletado), limpa a sessão
+          sessionStorage.removeItem('currentUser');
+          setCurrentUser(null);
+        }
       }
-      fetchData();
-    });
+    };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session?.user) {
-        // Buscar dados do usuário na tabela usuarios
-        const { data: userData } = await supabase
-          .from('usuarios')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
+    initializeUser();
+    fetchData();
 
-        setCurrentUser({
-          id: session.user.id,
-          nome: userData?.nome || session.user.user_metadata.nome || session.user.email?.split('@')[0] || 'Usuário',
-          role: userData?.role || session.user.user_metadata.role || 'operador'
-        });
-      } else {
-        setCurrentUser(null);
-      }
-    });
-
+    // Listener para atualizações em tempo real
     const channel = supabase.channel('db-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'participants' }, () => fetchData())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, () => fetchData())
@@ -123,37 +123,48 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       .subscribe();
 
     return () => {
-      subscription.unsubscribe();
       supabase.removeChannel(channel);
     };
   }, []);
 
-  const login = async (username: string, pass: string) => {
-    // Gera email automaticamente para o Supabase (invisível ao usuário)
-    const email = `${username.toLowerCase().trim()}@sistema.com`;
-    
-    const { error } = await supabase.auth.signInWithPassword({ 
-      email, 
-      password: pass 
-    });
-    
-    if (error) {
-      console.error("[Login Error]", error);
-      if (error.status === 400) {
-        toast.error("Usuário ou senha incorretos.");
-      } else {
-        toast.error(error.message || "Erro ao tentar entrar.");
-      }
+    const login = async (username: string, pass: string) => {
+    // 1. Buscar usuário pelo nome na tabela 'usuarios'
+    const { data: userData, error: queryError } = await supabase
+      .from('usuarios')
+      .select('*')
+      .eq('nome', username.trim())
+      .single();
+
+    if (queryError || !userData) {
+      console.error("[Login Error]", "Usuário não encontrado.");
+      toast.error("Usuário ou senha incorretos.");
       return false;
     }
-    
-    toast.success("Bem-vindo!");
-    return true;
+
+    // 2. Comparar a senha (em texto plano, como solicitado)
+    if (userData.senha === pass) {
+      // 3. Se a senha estiver correta, definir o usuário na aplicação e na sessão
+      const userToSave = {
+        id: userData.id,
+        nome: userData.nome,
+        role: userData.role,
+      };
+      setCurrentUser(userToSave);
+      sessionStorage.setItem('currentUser', JSON.stringify(userToSave));
+
+      toast.success(`Bem-vindo, ${userData.nome}!`);
+      return true;
+    } else {
+      // 4. Se a senha estiver incorreta
+      toast.error("Usuário ou senha incorretos.");
+      return false;
+    }
   };
 
   const logout = async () => {
-    await supabase.auth.signOut();
     setCurrentUser(null);
+    sessionStorage.removeItem('currentUser');
+    toast.info("Você saiu do sistema.");
   };
 
   const addParticipant = async (p: any) => {
@@ -167,6 +178,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }]);
     if (error) throw error;
     toast.success("Participante adicionado!");
+    fetchData();
   };
 
   const updateParticipant = async (id: string, updates: any) => {
@@ -179,40 +191,49 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }).eq('id', id);
     if (error) throw error;
     toast.success("Atualizado com sucesso!");
+    fetchData();
   };
 
   const deleteParticipant = async (id: string) => {
     const { error } = await supabase.from('participants').delete().eq('id', id);
     if (error) throw error;
     toast.success("Removido!");
+    fetchData();
   };
 
-  const importParticipants = (data: any[]) => {
+  const importParticipants = async (data: any[]) => {
     let success = 0;
     const errors: string[] = [];
+    const participantsToInsert: any[] = [];
 
     data.forEach((row, index) => {
-      try {
-        // Validação básica
-        if (!row.name || !row.cpf || !row.category) {
-          errors.push(`Linha ${index + 1}: Campos obrigatórios faltando (name, cpf, category)`);
-          return;
-        }
-
-        // Adicionar participante (versão síncrona para batch)
-        addParticipant({
-          name: row.name,
-          cpf: row.cpf,
-          category: row.category,
-          table: row.table || null,
-          status: row.status || 'pending'
-        });
-
-        success++;
-      } catch (error) {
-        errors.push(`Linha ${index + 1}: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+      // Validação: Apenas nome e categoria são obrigatórios na importação
+      if (!row.name || !row.category) {
+        errors.push(`Linha ${index + 2}: Faltam dados obrigatórios (Nome, Categoria)`);
+        return;
       }
+
+      participantsToInsert.push({
+        name: row.name,
+        cpf: row.cpf || null, // CPF agora é opcional
+        category_id: row.category,
+        table: row.table || null,
+        status: 'ausente'
+      });
     });
+
+    if (participantsToInsert.length > 0) {
+      const { error } = await supabase.from('participants').insert(participantsToInsert);
+
+      if (error) {
+        errors.push(`Erro no banco de dados: ${error.message}`);
+        toast.error("Ocorreu um erro ao salvar os dados.");
+      } else {
+        success = participantsToInsert.length;
+        toast.success(`${success} participantes importados com sucesso!`);
+        fetchData(); // Atualiza a lista
+      }
+    }
 
     return { success, errors };
   };
@@ -221,12 +242,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const { error } = await supabase.from('categories').insert([{ name, color }]);
     if (error) throw error;
     toast.success("Categoria criada!");
+    fetchData();
   };
 
   const deleteCategory = async (id: string) => {
     const { error } = await supabase.from('categories').delete().eq('id', id);
     if (error) throw error;
     toast.success("Categoria removida!");
+    fetchData();
   };
 
   const updateSettings = async (settings: any) => {
@@ -241,19 +264,38 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     toast.success("Configurações salvas!");
   };
 
-  const addOperator = async (username: string, pass: string) => {
+    const addOperator = async (username: string, pass: string) => {
+    if (!username.trim() || !pass) {
+      toast.error("Usuário e senha são obrigatórios.");
+      throw new Error("Usuário e senha são obrigatórios.");
+    }
+
     try {
-      const { data, error } = await supabase.functions.invoke('create-user', {
-        body: { username: username.trim(), password: pass, role: 'operador' }
-      });
+      const { error } = await supabase.from('usuarios').insert([
+        {
+          nome: username.trim(),
+          senha: pass, // Salvar a senha em texto plano
+          role: 'operador'
+        }
+      ]);
 
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-
-      toast.success(`Operador ${username} criado com sucesso!`);
-      fetchData();
+      if (error) {
+        // Trata erro de usuário duplicado
+        if (error.code === '23505') {
+          toast.error(`O nome de usuário "${username}" já existe.`);
+        } else {
+          throw error;
+        }
+      } else {
+        toast.success(`Operador ${username} criado com sucesso!`);
+        // O listener de tempo real já vai atualizar a lista, mas podemos forçar se necessário.
+        // fetchData();
+      }
     } catch (error: any) {
-      toast.error(error.message || "Erro ao criar operador");
+      console.error("Erro ao criar operador:", error);
+      if (!error.message.includes('já existe')) {
+          toast.error(error.message || "Erro desconhecido ao criar operador.");
+      }
       throw error;
     }
   };
@@ -272,6 +314,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       operator_id: currentUser?.id
     }).eq('id', id);
     if (error) throw error;
+    fetchData();
   };
 
   const bulkDeleteParticipants = async (ids: string[]) => {
@@ -288,6 +331,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }).in('id', ids);
     if (error) throw error;
     toast.success("Check-ins realizados!");
+    fetchData();
   };
 
   return (
