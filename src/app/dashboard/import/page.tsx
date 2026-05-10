@@ -27,9 +27,23 @@ export default function ImportPage() {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const text = e.target?.result as string;
+    try {
+      const text = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const result = event.target?.result as string;
+          if (result) {
+            resolve(result);
+          } else {
+            reject(new Error("Falha ao ler o conteúdo do arquivo."));
+          }
+        };
+        reader.onerror = () => {
+          reject(new Error("Ocorreu um erro ao ler o arquivo."));
+        };
+        reader.readAsText(file);
+      });
+
       const lines = text.split('\n');
       if (lines.length < 2) {
         toast.error("O arquivo parece estar vazio ou sem dados.");
@@ -37,7 +51,7 @@ export default function ImportPage() {
       }
 
       const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-      
+
       const data = lines.slice(1).filter(line => line.trim()).map(line => {
         const values = line.split(',').map(v => v.trim());
         const obj: any = {};
@@ -52,8 +66,10 @@ export default function ImportPage() {
       if (res.success > 0) {
         toast.success(`${res.success} participantes importados com sucesso!`);
       }
-    };
-    reader.readAsText(file);
+    } catch (error) {
+      console.error("Erro ao processar o arquivo:", error);
+      toast.error(String(error) || "Um erro desconhecido ocorreu.");
+    }
   };
 
   return (
