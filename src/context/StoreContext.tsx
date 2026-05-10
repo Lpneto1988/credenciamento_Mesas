@@ -17,7 +17,7 @@ interface StoreContextType {
   addParticipant: (p: any) => Promise<void>;
   updateParticipant: (id: string, updates: any) => Promise<void>;
   deleteParticipant: (id: string) => Promise<void>;
-  importParticipants: (data: any[]) => { success: number; errors: string[] };
+  importParticipants: (data: any[]) => Promise<{ success: number; errors: string[] }>;
   addCategory: (name: string, color: string) => Promise<void>;
   deleteCategory: (id: string) => Promise<void>;
   updateSettings: (settings: any) => Promise<void>;
