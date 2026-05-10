@@ -21,7 +21,7 @@ export default function ImportPage() {
     processFile(file);
   };
 
-  const processFile = (file: File) => {
+  const processFile = async (file: File) => {
     if (!file.name.endsWith('.csv')) {
       toast.error("Por favor, selecione um arquivo CSV válido.");
       return;
@@ -47,7 +47,7 @@ export default function ImportPage() {
         return obj;
       });
 
-      const res = importParticipants(data);
+      const res = await importParticipants(data);
       setResults(res);
       if (res.success > 0) {
         toast.success(`${res.success} participantes importados com sucesso!`);
