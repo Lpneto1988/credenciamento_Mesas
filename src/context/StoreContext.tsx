@@ -178,7 +178,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }]);
     if (error) throw error;
     toast.success("Participante adicionado!");
-    fetchData();
+    // fetchData(); // A atualização agora é em tempo real
   };
 
   const updateParticipant = async (id: string, updates: any) => {
@@ -191,14 +191,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }).eq('id', id);
     if (error) throw error;
     toast.success("Atualizado com sucesso!");
-    fetchData();
+    // fetchData(); // A atualização agora é em tempo real
   };
 
   const deleteParticipant = async (id: string) => {
     const { error } = await supabase.from('participants').delete().eq('id', id);
     if (error) throw error;
     toast.success("Removido!");
-    fetchData();
+    // fetchData();
   };
 
   const importParticipants = async (data: any[]) => {
@@ -231,7 +231,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       } else {
         success = participantsToInsert.length;
         toast.success(`${success} participantes importados com sucesso!`);
-        fetchData(); // Atualiza a lista
+        // fetchData(); // Atualiza a lista
       }
     }
 
@@ -242,14 +242,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const { error } = await supabase.from('categories').insert([{ name, color }]);
     if (error) throw error;
     toast.success("Categoria criada!");
-    fetchData();
+    // fetchData();
   };
 
   const deleteCategory = async (id: string) => {
     const { error } = await supabase.from('categories').delete().eq('id', id);
     if (error) throw error;
     toast.success("Categoria removida!");
-    fetchData();
+    // fetchData();
   };
 
   const updateSettings = async (settings: any) => {
@@ -304,7 +304,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const { error } = await supabase.from('usuarios').delete().eq('id', id);
     if (error) throw error;
     toast.success("Acesso removido!");
-    fetchData();
+    // fetchData();
   };
 
   const performCheckin = async (id: string) => {
@@ -314,7 +314,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       operator_id: currentUser?.id
     }).eq('id', id);
     if (error) throw error;
-    fetchData();
+    // fetchData();
   };
 
   const bulkDeleteParticipants = async (ids: string[]) => {
@@ -331,7 +331,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }).in('id', ids);
     if (error) throw error;
     toast.success("Check-ins realizados!");
-    fetchData();
+    // fetchData();
   };
 
   return (
