@@ -87,7 +87,9 @@ export default function CheckinPage() {
                 }}
                 scanDelay={500}
                 constraints={{ facingMode: 'environment' }}
-                className="absolute top-0 left-0 w-full h-full object-cover"
+                classNames={{
+                  video: 'absolute top-0 left-0 w-full h-full object-cover'
+                }}
               />
             </div>
             <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
