@@ -72,17 +72,18 @@ export default function CheckinPage() {
     if (isScanning) {
       // Configurações otimizadas para o scanner
       const config = {
-        fps: 20, // Aumenta um pouco os frames para detecção mais rápida
+        fps: 20,
         qrbox: (viewfinderWidth: number, viewfinderHeight: number) => {
             const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-            const qrboxSize = Math.floor(minEdge * 0.7); // Usa 70% da menor dimensão
+            const qrboxSize = Math.floor(minEdge * 0.7);
             return {
                 width: qrboxSize,
                 height: qrboxSize,
             };
         },
-        rememberLastUsedCamera: true, // Lembra a última câmera usada
-        supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
+        rememberLastUsedCamera: true,
+        supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
+        facingMode: "environment" // Adiciona a preferência pela câmera traseira
       };
 
       scanner = new Html5QrcodeScanner("reader", config, /* verbose= */ false);
