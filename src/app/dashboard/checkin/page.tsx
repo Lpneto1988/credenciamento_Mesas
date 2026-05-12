@@ -81,7 +81,7 @@ export default function CheckinPage() {
                 height: qrboxSize,
             };
         },
-        rememberLastUsedCamera: true,
+        rememberLastUsedCamera: false, // Força a re-seleção da câmera, crucial para mobile
         supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
         facingMode: "environment" // Adiciona a preferência pela câmera traseira
       };
