@@ -1,0 +1,23 @@
+
+> next-template@0.1.0 build
+> next build
+
+   ▲ Next.js 15.3.8
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 7.0s
+   Linting and checking validity of types ...
+Failed to compile.
+
+./src/app/dashboard/import/page.tsx:51:18
+Type error: Argument of type 'Promise<{ success: number; errors: string[]; }>' is not assignable to parameter of type 'SetStateAction<{ success: number; errors: string[]; } | null>'.
+
+[0m [90m 49 |[39m[0m
+[0m [90m 50 |[39m       [36mconst[39m res [33m=[39m importParticipants(data)[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 51 |[39m       setResults(res)[33m;[39m[0m
+[0m [90m    |[39m                  [31m[1m^[22m[39m[0m
+[0m [90m 52 |[39m       [36mif[39m (res[33m.[39msuccess [33m>[39m [35m0[39m) {[0m
+[0m [90m 53 |[39m         toast[33m.[39msuccess([32m`${res.success} participantes importados com sucesso!`[39m)[33m;[39m[0m
+[0m [90m 54 |[39m       }[0m
+Next.js build worker exited with code: 1 and signal: null

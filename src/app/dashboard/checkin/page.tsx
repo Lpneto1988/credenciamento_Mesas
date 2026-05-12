@@ -24,7 +24,7 @@ import {
 import { Participant } from "@/types";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { Html5QrcodeScanner } from "html5-qrcode";
+import { Html5QrcodeScanner, Html5QrcodeScanType } from "html5-qrcode";
 import { toast } from "sonner";
 
 export default function CheckinPage() {
@@ -70,11 +70,22 @@ export default function CheckinPage() {
     let scanner: Html5QrcodeScanner | null = null;
 
     if (isScanning) {
-      scanner = new Html5QrcodeScanner(
-        "reader",
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        /* verbose= */ false
-      );
+      // Configurações otimizadas para o scanner
+      const config = {
+        fps: 20, // Aumenta um pouco os frames para detecção mais rápida
+        qrbox: (viewfinderWidth: number, viewfinderHeight: number) => {
+            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+            const qrboxSize = Math.floor(minEdge * 0.7); // Usa 70% da menor dimensão
+            return {
+                width: qrboxSize,
+                height: qrboxSize,
+            };
+        },
+        rememberLastUsedCamera: true, // Lembra a última câmera usada
+        supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
+      };
+
+      scanner = new Html5QrcodeScanner("reader", config, /* verbose= */ false);
 
       scanner.render(
         (decodedText) => {
@@ -246,7 +257,10 @@ export default function CheckinPage() {
           <CardContent className="p-0 relative">
             <div id="reader" className="w-full"></div>
             <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-              <div className="w-48 h-48 sm:w-64 h-64 border-2 border-white/50 rounded-3xl border-dashed animate-pulse" />
+              <div className="w-48 h-48 sm:w-64 h-64 border-4 border-white/50 rounded-3xl border-dashed animate-pulse" />
+              <div className="absolute bottom-4 left-4 right-4 p-2 bg-black/40 backdrop-blur-sm text-white text-xs font-bold rounded-lg text-center">
+                Aponte a câmera para o QR Code
+              </div>
             </div>
           </CardContent>
         </Card>
