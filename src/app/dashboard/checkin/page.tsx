@@ -69,26 +69,27 @@ export default function CheckinPage() {
       {isScanning && (
         <Card className="overflow-hidden rounded-3xl border-2 border-primary/20 bg-slate-900">
           <CardContent className="p-0 relative">
-            <Scanner
-              onScan={(result) => {
-                if (result && result.length > 0) {
-                    const decodedText = result[0].rawValue;
-                    const participant = participants.find(p => p.id === decodedText || p.cpf === decodedText);
-                    if (participant) {
-                      handleCheckin(participant);
-                    } else {
-                      toast.error("QR Code inválido ou participante não encontrado.");
+            <div className="relative w-full overflow-hidden" style={{ paddingTop: '100%' }}>
+              <Scanner
+                onScan={(result) => {
+                    if (result && result.length > 0) {
+                        const decodedText = result[0].rawValue;
+                        const participant = participants.find(p => p.id === decodedText || p.cpf === decodedText);
+                        if (participant) {
+                          handleCheckin(participant);
+                        } else {
+                          toast.error("QR Code inválido ou participante não encontrado.");
+                        }
                     }
-                }
-              }}
-              onError={(error) => {
-                console.log(error);
-              }}
-              scanDelay={500}
-              constraints={{ facingMode: 'environment' }}
-              containerStyle={{ width: '100%', paddingTop: '100%' }} // Mantém o aspect ratio
-              videoStyle={{ objectFit: 'cover' }}
-            />
+                }}
+                onError={(error) => {
+                    console.log(error);
+                }}
+                scanDelay={500}
+                constraints={{ facingMode: 'environment' }}
+                className="absolute top-0 left-0 w-full h-full object-cover"
+              />
+            </div>
             <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
               <div className="w-48 h-48 sm:w-64 h-64 border-4 border-white/50 rounded-3xl border-dashed animate-pulse" />
               <div className="absolute bottom-4 left-4 right-4 p-2 bg-black/40 backdrop-blur-sm text-white text-xs font-bold rounded-lg text-center">
