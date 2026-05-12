@@ -114,12 +114,83 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     initializeUser();
     fetchData();
 
-    // Listener para atualizações em tempo real
+    const handleChanges = (payload: any) => {
+      console.log('Change received!', payload);
+
+      const { table, eventType, new: newRecord, old: oldRecord } = payload;
+
+      switch (table) {
+        case 'participants':
+          setParticipants(currentParticipants => {
+            if (eventType === 'INSERT') {
+              return [...currentParticipants, newRecord];
+            }
+            if (eventType === 'UPDATE') {
+              return currentParticipants.map(p => p.id === newRecord.id ? newRecord : p);
+            }
+            if (eventType === 'DELETE') {
+              return currentParticipants.filter(p => p.id !== oldRecord.id);
+            }
+            return currentParticipants;
+          });
+          break;
+        case 'categories':
+          setCategories(currentCategories => {
+            if (eventType === 'INSERT') {
+              return [...currentCategories, newRecord];
+            }
+            if (eventType === 'UPDATE') {
+              return currentCategories.map(c => c.id === newRecord.id ? newRecord : c);
+            }
+            if (eventType === 'DELETE') {
+              return currentCategories.filter(c => c.id !== oldRecord.id);
+            }
+            return currentCategories;
+          });
+          break;
+        case 'usuarios':
+           setOperators(currentOperators => {
+            if (eventType === 'INSERT') {
+              // Adiciona apenas se for um operador
+              return newRecord.role === 'operador' ? [...currentOperators, newRecord] : currentOperators;
+            }
+            if (eventType === 'UPDATE') {
+              const wasOperator = currentOperators.some(op => op.id === newRecord.id);
+              const isOperator = newRecord.role === 'operador';
+
+              // Se tornou operador
+              if (!wasOperator && isOperator) return [...currentOperators, newRecord];
+              // Deixou de ser operador
+              if (wasOperator && !isOperator) return currentOperators.filter(op => op.id !== newRecord.id);
+              // Era e continua sendo operador
+              if (wasOperator && isOperator) return currentOperators.map(op => op.id === newRecord.id ? newRecord : op);
+
+              return currentOperators;
+            }
+            if (eventType === 'DELETE') {
+              return currentOperators.filter(op => op.id !== oldRecord.id);
+            }
+            return currentOperators;
+          });
+          break;
+        case 'event_settings':
+          if (eventType === 'UPDATE' || eventType === 'INSERT') {
+            setEventSettings({
+                ...newRecord,
+                totalTables: newRecord.total_tables,
+                capacityPerTable: newRecord.capacity_per_table
+            });
+          }
+          break;
+        default:
+          // Opcional: recarregar tudo se uma tabela não tratada for alterada
+          fetchData();
+          break;
+      }
+    };
+
     const channel = supabase.channel('db-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'participants' }, () => fetchData())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, () => fetchData())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'event_settings' }, () => fetchData())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'usuarios' }, () => fetchData())
+      .on('postgres_changes', { event: '*', schema: 'public' }, handleChanges)
       .subscribe();
 
     return () => {
