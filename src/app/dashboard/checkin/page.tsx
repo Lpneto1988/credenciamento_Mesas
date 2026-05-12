@@ -70,12 +70,15 @@ export default function CheckinPage() {
         <Card className="overflow-hidden rounded-3xl border-2 border-primary/20 bg-slate-900">
           <CardContent className="p-0 relative">
             <Scanner
-              onResult={(result) => {
-                const participant = participants.find(p => p.id === result || p.cpf === result);
-                if (participant) {
-                  handleCheckin(participant);
-                } else {
-                  toast.error("QR Code inválido ou participante não encontrado.");
+              onScan={(result) => {
+                if (result && result.length > 0) {
+                    const decodedText = result[0].rawValue;
+                    const participant = participants.find(p => p.id === decodedText || p.cpf === decodedText);
+                    if (participant) {
+                      handleCheckin(participant);
+                    } else {
+                      toast.error("QR Code inválido ou participante não encontrado.");
+                    }
                 }
               }}
               onError={(error) => {
