@@ -70,7 +70,7 @@ export default function CheckinPage() {
         <Card className="overflow-hidden rounded-3xl border-2 border-primary/20 bg-slate-900">
           <CardContent className="p-0 relative">
             <Scanner
-              onDecode={(result) => {
+              onResult={(result) => {
                 const participant = participants.find(p => p.id === result || p.cpf === result);
                 if (participant) {
                   handleCheckin(participant);
