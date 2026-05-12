@@ -121,12 +121,19 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
       switch (table) {
         case 'participants':
+          const mapParticipant = (p: any) => ({
+            ...p,
+            categoryId: p.category_id,
+            checkinTime: p.checkin_time,
+            operatorId: p.operator_id,
+          });
+
           setParticipants(currentParticipants => {
             if (eventType === 'INSERT') {
-              return [...currentParticipants, newRecord];
+              return [...currentParticipants, mapParticipant(newRecord)];
             }
             if (eventType === 'UPDATE') {
-              return currentParticipants.map(p => p.id === newRecord.id ? newRecord : p);
+              return currentParticipants.map(p => p.id === newRecord.id ? mapParticipant(newRecord) : p);
             }
             if (eventType === 'DELETE') {
               return currentParticipants.filter(p => p.id !== oldRecord.id);
