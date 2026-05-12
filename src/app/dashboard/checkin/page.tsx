@@ -24,7 +24,7 @@ import {
 import { Participant } from "@/types";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { Html5QrcodeScanner, Html5QrcodeScanType } from "html5-qrcode";
+import { QrReader } from "react-qr-reader";
 import { toast } from "sonner";
 
 export default function CheckinPage() {
@@ -66,50 +66,37 @@ export default function CheckinPage() {
     setIsScanning(false);
   };
 
-  useEffect(() => {
-    let scanner: Html5QrcodeScanner | null = null;
+      {isScanning && (
+        <Card className="overflow-hidden rounded-3xl border-2 border-primary/20 bg-slate-900">
+          <CardContent className="p-0 relative">
+            <QrReader
+              onResult={(result, error) => {
+                if (!!result) {
+                  const decodedText = result.getText();
+                  const participant = participants.find(p => p.id === decodedText || p.cpf === decodedText);
+                  if (participant) {
+                    handleCheckin(participant);
+                  } else {
+                    toast.error("QR Code inválido ou participante não encontrado.");
+                  }
+                }
 
-    if (isScanning) {
-      // Configurações otimizadas para o scanner
-      const config = {
-        fps: 20,
-        qrbox: (viewfinderWidth: number, viewfinderHeight: number) => {
-            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-            const qrboxSize = Math.floor(minEdge * 0.7);
-            return {
-                width: qrboxSize,
-                height: qrboxSize,
-            };
-        },
-        rememberLastUsedCamera: false, // Força a re-seleção da câmera, crucial para mobile
-        supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
-        facingMode: "environment" // Adiciona a preferência pela câmera traseira
-      };
-
-      scanner = new Html5QrcodeScanner("reader", config, /* verbose= */ false);
-
-      scanner.render(
-        (decodedText) => {
-          const participant = participants.find(p => p.id === decodedText || p.cpf === decodedText);
-          if (participant) {
-            handleCheckin(participant);
-            scanner?.clear();
-          } else {
-            toast.error("QR Code inválido ou participante não encontrado.");
-          }
-        },
-        (error) => {
-          // Silently handle scan errors
-        }
-      );
-    }
-
-    return () => {
-      if (scanner) {
-        scanner.clear().catch(error => console.error("Failed to clear scanner", error));
-      }
-    };
-  }, [isScanning, participants]);
+                if (!!error) {
+                  // console.info(error);
+                }
+              }}
+              constraints={{ facingMode: 'environment' }}
+              className="w-full"
+            />
+            <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+              <div className="w-48 h-48 sm:w-64 h-64 border-4 border-white/50 rounded-3xl border-dashed animate-pulse" />
+              <div className="absolute bottom-4 left-4 right-4 p-2 bg-black/40 backdrop-blur-sm text-white text-xs font-bold rounded-lg text-center">
+                Aponte a câmera para o QR Code
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
   const handlePrint = () => {
     if (!selectedParticipant) return;
@@ -253,19 +240,6 @@ export default function CheckinPage() {
         </Button>
       </div>
 
-      {isScanning && (
-        <Card className="overflow-hidden rounded-3xl border-2 border-primary/20 bg-slate-900">
-          <CardContent className="p-0 relative">
-            <div id="reader" className="w-full"></div>
-            <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-              <div className="w-48 h-48 sm:w-64 h-64 border-4 border-white/50 rounded-3xl border-dashed animate-pulse" />
-              <div className="absolute bottom-4 left-4 right-4 p-2 bg-black/40 backdrop-blur-sm text-white text-xs font-bold rounded-lg text-center">
-                Aponte a câmera para o QR Code
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       <div className="space-y-4">
         {search.length >= 3 && filteredParticipants.length === 0 && (
