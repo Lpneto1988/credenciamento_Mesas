@@ -39,7 +39,7 @@ export default function CheckinPage() {
   const progress = total > 0 ? (present / total) * 100 : 0;
 
   const filteredParticipants = useMemo(() => {
-    if (search.length < 3) return [];
+    if (search.length < 1) return [];
     const term = search.toLowerCase();
     return participants.filter(p => 
       p.name.toLowerCase().includes(term) || 
