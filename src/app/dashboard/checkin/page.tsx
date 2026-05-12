@@ -82,7 +82,7 @@ export default function CheckinPage() {
                 }
               }}
               onError={(error) => {
-                console.log(error?.message);
+                console.log(error);
               }}
               scanDelay={500}
               constraints={{ facingMode: 'environment' }}
