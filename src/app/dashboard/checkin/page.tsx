@@ -24,7 +24,7 @@ import {
 import { Participant } from "@/types";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { QrReader } from "react-qr-reader";
+import { QrScanner } from "@yudiel/react-qr-scanner";
 import { toast } from "sonner";
 
 export default function CheckinPage() {
@@ -69,24 +69,22 @@ export default function CheckinPage() {
       {isScanning && (
         <Card className="overflow-hidden rounded-3xl border-2 border-primary/20 bg-slate-900">
           <CardContent className="p-0 relative">
-            <QrReader
-              onResult={(result, error) => {
-                if (!!result) {
-                  const decodedText = result.getText();
-                  const participant = participants.find(p => p.id === decodedText || p.cpf === decodedText);
-                  if (participant) {
-                    handleCheckin(participant);
-                  } else {
-                    toast.error("QR Code inválido ou participante não encontrado.");
-                  }
-                }
-
-                if (!!error) {
-                  // console.info(error);
+            <QrScanner
+              onDecode={(result) => {
+                const participant = participants.find(p => p.id === result || p.cpf === result);
+                if (participant) {
+                  handleCheckin(participant);
+                } else {
+                  toast.error("QR Code inválido ou participante não encontrado.");
                 }
               }}
+              onError={(error) => {
+                console.log(error?.message);
+              }}
+              scanDelay={500}
               constraints={{ facingMode: 'environment' }}
-              className="w-full"
+              containerStyle={{ width: '100%', paddingTop: '100%' }} // Mantém o aspect ratio
+              videoStyle={{ objectFit: 'cover' }}
             />
             <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
               <div className="w-48 h-48 sm:w-64 h-64 border-4 border-white/50 rounded-3xl border-dashed animate-pulse" />
