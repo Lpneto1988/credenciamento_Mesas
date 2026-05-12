@@ -24,7 +24,7 @@ import {
 import { Participant } from "@/types";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { QrScanner } from "@yudiel/react-qr-scanner";
+import { Scanner } from "@yudiel/react-qr-scanner";
 import { toast } from "sonner";
 
 export default function CheckinPage() {
@@ -69,7 +69,7 @@ export default function CheckinPage() {
       {isScanning && (
         <Card className="overflow-hidden rounded-3xl border-2 border-primary/20 bg-slate-900">
           <CardContent className="p-0 relative">
-            <QrScanner
+            <Scanner
               onDecode={(result) => {
                 const participant = participants.find(p => p.id === result || p.cpf === result);
                 if (participant) {
