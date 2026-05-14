@@ -65,11 +65,16 @@ export default function SettingsPage() {
                   Total de Mesas
                 </Label>
                 <Input 
-                  id="event-tables" 
-                  type="number"
+                  id="event-tables"
+                  type="text"
+                  pattern="\d*"
+                  inputMode="numeric"
                   min="1"
                   value={formData.totalTables}
-                  onChange={e => setFormData({...formData, totalTables: parseInt(e.target.value) || 1})}
+                  onChange={e => {
+                    const value = e.target.value.replace(/\D/g, '');
+                    setFormData({...formData, totalTables: parseInt(value, 10) || 0})
+                  }}
                 />
               </div>
             </div>
@@ -81,11 +86,16 @@ export default function SettingsPage() {
                   Capacidade por Mesa
                 </Label>
                 <Input 
-                  id="event-capacity" 
-                  type="number"
+                  id="event-capacity"
+                  type="text"
+                  pattern="\d*"
+                  inputMode="numeric"
                   min="1"
                   value={formData.capacityPerTable}
-                  onChange={e => setFormData({...formData, capacityPerTable: parseInt(e.target.value) || 1})}
+                  onChange={e => {
+                    const value = e.target.value.replace(/\D/g, '');
+                    setFormData({...formData, capacityPerTable: parseInt(value, 10) || 0})
+                  }}
                 />
               </div>
               <div className="space-y-2">
