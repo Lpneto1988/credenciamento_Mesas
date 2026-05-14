@@ -22,7 +22,7 @@ import {
   Maximize2
 } from "lucide-react";
 import { Participant } from "@/types";
-import { cn } from "@/lib/utils";
+import { cn, normalizeString } from "@/lib/utils";
 import { format } from "date-fns";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { toast } from "sonner";
@@ -40,10 +40,10 @@ export default function CheckinPage() {
 
   const filteredParticipants = useMemo(() => {
     if (search.length < 1) return [];
-    const term = search.toLowerCase();
-    return participants.filter(p => 
-      p.name.toLowerCase().includes(term) || 
-      p.cpf.includes(term)
+    const normalizedSearch = normalizeString(search);
+    return participants.filter(p =>
+      normalizeString(p.name).includes(normalizedSearch) ||
+      p.cpf.includes(search)
     ).slice(0, 5);
   }, [participants, search]);
 

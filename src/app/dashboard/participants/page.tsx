@@ -43,7 +43,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
+import { cn, normalizeString } from "@/lib/utils";
 
 export default function ParticipantsPage() {
   const { 
@@ -74,7 +74,8 @@ export default function ParticipantsPage() {
   });
 
   const filtered = participants.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.cpf.includes(search);
+    const normalizedSearch = normalizeString(search);
+    const matchesSearch = normalizeString(p.name).includes(normalizedSearch) || p.cpf.includes(search);
     const matchesCategory = filterCategory === "all" || p.categoryId === filterCategory;
     const matchesStatus = filterStatus === "all" || p.status === filterStatus;
     return matchesSearch && matchesCategory && matchesStatus;
