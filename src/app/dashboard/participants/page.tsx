@@ -483,14 +483,16 @@ export default function ParticipantsPage() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="table" className="text-xs font-bold text-slate-700 ml-0.5">Mesa</Label>
-                <Input 
-                  id="table" 
-                  type="number" 
-                  min="1" 
-                  required 
+                <Input
+                  id="table"
+                  type="text"
+                  pattern="\d*"
+                  inputMode="numeric"
+                  min="1"
+                  required
                   className="h-10 rounded-lg border-slate-200"
                   value={formData.table}
-                  onChange={e => setFormData({...formData, table: e.target.value})}
+                  onChange={e => setFormData({...formData, table: e.target.value.replace(/\D/g, '')})}
                 />
               </div>
             </div>
