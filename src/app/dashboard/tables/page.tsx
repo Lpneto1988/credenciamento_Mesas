@@ -16,7 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Users, UserCheck, UserX, CheckCircle2, Search } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, normalizeString } from "@/lib/utils";
 import { toast } from "sonner";
 
 export default function TablesPage() {
@@ -32,8 +32,9 @@ export default function TablesPage() {
 
   const searchResults = useMemo(() => {
     if (search.length < 2) return [];
-    return participants.filter(p => 
-      p.name.toLowerCase().includes(search.toLowerCase()) || 
+    const normalizedSearch = normalizeString(search);
+    return participants.filter(p =>
+      normalizeString(p.name).includes(normalizedSearch) ||
       p.cpf.includes(search)
     ).slice(0, 5);
   }, [participants, search]);
